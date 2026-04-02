@@ -13,6 +13,7 @@ dependencies:
   flutter_secure_storage: ^9.0.0
   local_auth: ^2.1.8
   cupertino_icons: ^1.0.8
+  provider: ^6.1.5+1
 
 dev_dependencies:
   flutter_test:
@@ -25,6 +26,7 @@ flutter_launcher_icons:
   ios: true
   image_path: assets/images/Full Logo.png
   remove_alpha_ios: true
+  adaptive_icon_background: "#B0DB9C"
 
 flutter:
   uses-material-design: true
@@ -33,3 +35,24 @@ flutter:
   assets:
     - assets/images/Full Logo.png
     - assets/images/Text.png
+    - assets/images/bg_image.png
+    - assets/images/Grid_pattern.png
+
+ # Fonts
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter_18pt-Regular.ttf
+          weight: 400
+    
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+    
+    - family: NotoSans
+      fonts:
+        - asset: assets/fonts/NotoSans-Regular.ttf
+          weight: 400
