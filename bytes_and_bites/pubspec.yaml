@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  shared_preferences: ^2.2.2
+  shared_preferences: ^2.5.3
   flutter_secure_storage: ^9.0.0
   local_auth: ^2.1.8
   cupertino_icons: ^1.0.8
@@ -37,7 +37,23 @@ flutter:
     - assets/images/Text.png
     - assets/images/bg_image.png
     - assets/images/Grid_pattern.png
+    - assets/images/lock_icon.png
+    - assets/images/name_page_icon.png
 
+    # Bottom Nav Icons
+    - assets/images/bottom_nav_bar/active_home.png
+    - assets/images/bottom_nav_bar/active_inventory.png
+    - assets/images/bottom_nav_bar/active_profile.png
+    - assets/images/bottom_nav_bar/active_transactions.png
+    - assets/images/bottom_nav_bar/home.png
+    - assets/images/bottom_nav_bar/inventory.png
+    - assets/images/bottom_nav_bar/profile.png
+    - assets/images/bottom_nav_bar/transactions.png
+
+    # FAB
+    - assets/images/bottom_nav_bar/fab.png
+    - assets/images/bottom_nav_bar/fab_transactions.png
+    - assets/images/bottom_nav_bar/fab_inventory.png
  # Fonts
   fonts:
     - family: Inter

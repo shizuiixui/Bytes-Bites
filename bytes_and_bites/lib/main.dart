@@ -1,6 +1,6 @@
-import 'package:bytes_and_bites/features/auth/presentation/screens/landing_page.dart';
+import 'package:bytes_and_bites/core/widgets/splash_screen.dart';
 import 'package:flutter/material.dart';
-import 'core/widgets/splash_screen.dart';
+import 'core/routes/app_router.dart';
 
 void main() {
   runApp(const BytesAndBitesApp());
@@ -18,7 +18,10 @@ class BytesAndBitesApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFB0DB9C)),
         useMaterial3: true,
       ),
-      home: const LandingPage(),
+
+      home: const SplashScreen(),
+
+      routes: AppRouter.getRoutes(),
     );
   }
 }

@@ -12,30 +12,28 @@ class LandingPageHelpers extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 10),
-          
+
           // Title
           const Text.rich(
             TextSpan(
-              text: 'Take Control of\nYour ', 
+              text: 'Take Control of\nYour ',
               style: TextStyle(
                 fontSize: 35,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w700,
                 color: Colors.black,
-                height: 1.2, 
+                height: 1.2,
               ),
               children: [
                 TextSpan(
                   text: 'Budget',
-                  style: TextStyle(
-                    color: Color(0xFFB0DB9C),
-                  ),
+                  style: TextStyle(color: Color(0xFFB0DB9C)),
                 ),
               ],
             ),
           ),
-          
-          const SizedBox(height: 12), 
+
+          const SizedBox(height: 12),
 
           // Subtitle
           const Text(
@@ -44,22 +42,22 @@ class LandingPageHelpers extends StatelessWidget {
               fontSize: 16,
               fontFamily: 'NotoSans',
               fontWeight: FontWeight.w400,
-              color: Colors.black87, 
+              color: Colors.black87,
             ),
           ),
-          
+
           const SizedBox(height: 50),
 
-          // BUTTON SECTION
+          // Button
           SizedBox(
             width: double.infinity,
             height: 50,
             child: PrimaryButton(
               text: "Get Started",
               onPressed: () {
-                // Navigator.pushReplacementNamed(context, newRoute);
+                Navigator.pushReplacementNamed(context, 'name_setup');
               },
-            )
+            ),
           ),
         ],
       ),

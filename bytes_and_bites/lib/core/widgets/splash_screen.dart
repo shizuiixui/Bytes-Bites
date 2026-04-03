@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -7,33 +8,32 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _textAnimation;
-
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-
     _startSplashSequence();
   }
 
   Future<void> _startSplashSequence() async {
-    await Future.delayed(const Duration(seconds: 1));
+    // Wait 2 seconds for the logo
+    await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
-    await _controller.forward();
-    // Navigator.pushReplacementNamed(context, '/home');
-  }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+    // Check the local database
+    final prefs = await SharedPreferences.getInstance();
+
+    //  Look for the 'is_first_time' flag
+    bool isFirstTime = prefs.getBool('is_first_time') ?? true;
+
+    // The Smart Routing Logic
+    if (isFirstTime) {
+      // If new, send them to Landing Page
+      Navigator.pushReplacementNamed(context, 'landing_page');
+    } else {
+      // If they already set up their profile, skip onboarding entirely!
+      Navigator.pushReplacementNamed(context, 'home_dashboard');
+    }
   }
 
   @override
@@ -51,6 +51,9 @@ class _SplashScreenState extends State<SplashScreen>
               height: 300,
               fit: BoxFit.contain,
             ),
+
+            const SizedBox(height: 20),
+
             // Loading Indicator
             const CircularProgressIndicator(color: Colors.white),
           ],
