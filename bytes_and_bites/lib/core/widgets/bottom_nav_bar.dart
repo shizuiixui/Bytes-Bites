@@ -38,10 +38,11 @@ class BottomNavBar extends StatelessWidget {
             height: 24,
           ),
           activeIcon: Image.asset(
-            'assets/images/bottom_navbar/active_home.png',
+            'assets/images/bottom_nav_bar/active_home.png',
             width: 24,
             height: 24,
           ),
+          label: 'Home',
         ),
 
         // Transactions
@@ -52,8 +53,11 @@ class BottomNavBar extends StatelessWidget {
             height: 24,
           ),
           activeIcon: Image.asset(
-            'assets/images/bottom_nav_bar/active_transactions/png',
+            'assets/images/bottom_nav_bar/active_transactions.png',
+            width: 24,
+            height: 24,
           ),
+          label: 'Transactions',
         ),
 
         // Inventory
@@ -68,6 +72,7 @@ class BottomNavBar extends StatelessWidget {
             width: 24,
             height: 24,
           ),
+          label: 'Inventory',
         ),
 
         // Profile
@@ -82,6 +87,7 @@ class BottomNavBar extends StatelessWidget {
             width: 24,
             height: 24,
           ),
+          label: 'Profile',
         ),
       ],
     );

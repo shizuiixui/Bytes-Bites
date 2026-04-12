@@ -32,7 +32,7 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
 
       // Navigate to Home
       if (mounted) {
-        // Navigator.pushReplacementNamed(context, 'home_dashboard');
+        Navigator.pushReplacementNamed(context, 'homepage');
       }
     }
   }
@@ -95,7 +95,7 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
               padding: const EdgeInsets.only(bottom: 20),
               child: TextButton(
                 onPressed: () {
-                  // Navigator.pushReplacementNamed(context, '/home_dashboard');
+                  Navigator.pushReplacementNamed(context, 'homepage');
                 },
                 child: const Text(
                   'Skip for now',

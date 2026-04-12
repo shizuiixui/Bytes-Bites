@@ -32,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.pushReplacementNamed(context, 'landing_page');
     } else {
       // If they already set up their profile, skip onboarding entirely!
-      Navigator.pushReplacementNamed(context, 'home_dashboard');
+      Navigator.pushReplacementNamed(context, 'homepage');
     }
   }
 

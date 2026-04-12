@@ -1,3 +1,5 @@
+import 'package:bytes_and_bites/core/widgets/main_navigation.dart';
+import 'package:bytes_and_bites/features/home/screens/homepage.dart';
 import 'package:flutter/material.dart';
 
 // Landing Page
@@ -15,6 +17,7 @@ class AppRouter {
       'landing_page': (context) => const LandingPage(),
       'name_setup': (context) => const NameSetupScreen(),
       'password_setup': (context) => const PasswordSetupScreen(),
+      'homepage': (context) => const MainNavigation(),
     };
   }
 }
