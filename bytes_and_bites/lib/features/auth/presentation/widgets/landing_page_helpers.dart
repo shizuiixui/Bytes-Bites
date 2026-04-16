@@ -1,5 +1,6 @@
 import 'package:bytes_and_bites/core/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LandingPageHelpers extends StatelessWidget {
   const LandingPageHelpers({super.key});
@@ -7,18 +8,18 @@ class LandingPageHelpers extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      padding: EdgeInsets.symmetric(horizontal: 20.0.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 10),
+          SizedBox(height: 10.h),
 
           // Title
-          const Text.rich(
+          Text.rich(
             TextSpan(
               text: 'Take Control of\nYour ',
               style: TextStyle(
-                fontSize: 35,
+                fontSize: 35.sp,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w700,
                 color: Colors.black,
@@ -33,25 +34,25 @@ class LandingPageHelpers extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
 
           // Subtitle
-          const Text(
+          Text(
             'Manage your spending and dorm inventory, entirely offline.',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.sp,
               fontFamily: 'NotoSans',
               fontWeight: FontWeight.w400,
               color: Colors.black87,
             ),
           ),
 
-          const SizedBox(height: 50),
+          SizedBox(height: 50.h),
 
           // Button
           SizedBox(
             width: double.infinity,
-            height: 50,
+            height: 50.h,
             child: PrimaryButton(
               text: "Get Started",
               onPressed: () {

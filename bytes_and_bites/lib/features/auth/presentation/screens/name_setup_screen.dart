@@ -3,6 +3,7 @@ import 'package:bytes_and_bites/core/widgets/textbox.dart';
 import 'package:bytes_and_bites/features/auth/presentation/widgets/name_setup_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class NameSetupScreen extends StatefulWidget {
   const NameSetupScreen({super.key});
@@ -36,25 +37,25 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
                   children: [
                     // Top Image
                     Padding(
-                      padding: const EdgeInsets.only(top: 50),
+                      padding: EdgeInsets.only(top: 50.h),
                       child: Image.asset(
                         'assets/images/name_page_icon.png',
-                        height: 180,
-                        width: 150,
+                        height: 180.h,
+                        width: 150.w,
                         fit: BoxFit.contain,
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
 
                     // Text Section
                     const NameSetupHelpers(),
 
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10.h),
 
                     // Input Field
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
                       child: Form(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,13 +79,13 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
 
             // Button
             Padding(
-              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+              padding: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 20.h),
               child: Column(
                 children: [
                   // Continue Button
                   SizedBox(
                     width: double.infinity,
-                    height: 50,
+                    height: 50.h,
                     child: PrimaryButton(
                       text: "Continue",
                       onPressed: () async {
@@ -117,17 +118,17 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 5),
+                  SizedBox(height: 5.h),
 
                   // Skip Button
                   TextButton(
                     onPressed: () {
                       Navigator.pushReplacementNamed(context, 'password_setup');
                     },
-                    child: const Text(
+                    child: Text(
                       'Skip for now',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 16.sp,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w700,
                         color: Color(0xFFB0DB9C),

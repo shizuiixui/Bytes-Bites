@@ -1,5 +1,8 @@
 import 'package:bytes_and_bites/core/widgets/main_navigation.dart';
 import 'package:bytes_and_bites/features/home/screens/homepage.dart';
+import 'package:bytes_and_bites/features/inventory/screens/add_inventory_page.dart';
+import 'package:bytes_and_bites/features/subscriptions/screens/add_subscription_page.dart';
+import 'package:bytes_and_bites/features/transactions/screens/add_expense_page.dart';
 import 'package:flutter/material.dart';
 
 // Landing Page
@@ -18,6 +21,10 @@ class AppRouter {
       'name_setup': (context) => const NameSetupScreen(),
       'password_setup': (context) => const PasswordSetupScreen(),
       'homepage': (context) => const MainNavigation(),
+
+      'add_expense': (context) => const AddExpensePage(),
+      'add_subscription': (context) => const AddSubscriptionPage(),
+      'add_inventory': (context) => const AddInventoryPage(),
     };
   }
 }

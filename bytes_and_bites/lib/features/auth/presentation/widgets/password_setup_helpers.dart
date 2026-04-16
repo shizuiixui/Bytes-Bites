@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // Text Header
 class PasswordSetupHelpers extends StatelessWidget {
@@ -6,8 +7,8 @@ class PasswordSetupHelpers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.0),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.0.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -15,7 +16,7 @@ class PasswordSetupHelpers extends StatelessWidget {
           Text(
             'Create Your Passcode',
             style: TextStyle(
-              fontSize: 30,
+              fontSize: 30.sp,
               fontFamily: 'Poppins',
               fontWeight: FontWeight.w700,
               color: Colors.black,
@@ -25,7 +26,7 @@ class PasswordSetupHelpers extends StatelessWidget {
           Text(
             'Enter a 4-digit passcode to keep your budget and inventory private',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.sp,
               fontFamily: 'NotoSans',
               fontWeight: FontWeight.w400,
               color: Colors.black87,
@@ -50,9 +51,9 @@ class PasscodeIndicator extends StatelessWidget {
       children: List.generate(4, (index) {
         bool isFilled = index < pinLength;
         return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 10),
-          width: 16,
-          height: 16,
+          margin: EdgeInsets.symmetric(horizontal: 10.0.w),
+          width: 16.0.w,
+          height: 16.0.h,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: isFilled ? const Color(0xFFB0DB9C) : Colors.transparent,
@@ -82,15 +83,15 @@ class CustomNumpad extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: EdgeInsets.symmetric(horizontal: 40.0.w),
       child: Column(
         children: [
           _buildNumberRow(['1', '2', '3']),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.0.h),
           _buildNumberRow(['4', '5', '6']),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.0.h),
           _buildNumberRow(['7', '8', '9']),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.0.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -122,8 +123,8 @@ class CustomNumpad extends StatelessWidget {
       onTap: () => onNumberPressed(number),
       borderRadius: BorderRadius.circular(40),
       child: Container(
-        width: 70,
-        height: 70,
+        width: 70.0.w,
+        height: 70.0.h,
         decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: Color(0xFFF5F5F5),
@@ -131,8 +132,8 @@ class CustomNumpad extends StatelessWidget {
         child: Center(
           child: Text(
             number,
-            style: const TextStyle(
-              fontSize: 24,
+            style: TextStyle(
+              fontSize: 24.sp,
               fontFamily: 'Poppins',
               fontWeight: FontWeight.w600,
               color: Color(0xFF607D8B),
@@ -151,8 +152,8 @@ class CustomNumpad extends StatelessWidget {
       onTap: onPressed,
       borderRadius: BorderRadius.circular(40),
       child: Container(
-        width: 70,
-        height: 70,
+        width: 70.w,
+        height: 70.h,
         alignment: Alignment.center,
         child: Icon(icon, size: 28, color: Colors.black87),
       ),

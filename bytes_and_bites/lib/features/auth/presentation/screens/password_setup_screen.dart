@@ -1,6 +1,7 @@
 import 'package:bytes_and_bites/features/auth/presentation/widgets/password_setup_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PasswordSetupScreen extends StatefulWidget {
   const PasswordSetupScreen({super.key});
@@ -58,26 +59,26 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(top: 50),
+                      padding: EdgeInsets.only(top: 50.h),
                       child: Image.asset(
                         'assets/images/lock_icon.png',
-                        height: 120,
-                        width: 120,
+                        height: 120.h,
+                        width: 120.h,
                         fit: BoxFit.contain,
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
 
                     // Custom Text Helper
                     const PasswordSetupHelpers(),
 
-                    const SizedBox(height: 30),
+                    SizedBox(height: 30.h),
 
                     // Custom Dots Helper
                     PasscodeIndicator(pinLength: _pin.length),
 
-                    const SizedBox(height: 40),
+                    SizedBox(height: 40.h),
 
                     // Custom Numpad
                     CustomNumpad(
@@ -92,15 +93,15 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
 
             // Bottom Section
             Padding(
-              padding: const EdgeInsets.only(bottom: 20),
+              padding: EdgeInsets.only(bottom: 20.h),
               child: TextButton(
                 onPressed: () {
                   Navigator.pushReplacementNamed(context, 'homepage');
                 },
-                child: const Text(
+                child: Text(
                   'Skip for now',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w700,
                     color: Color(0xFFB0DB9C),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class NameSetupHelpers extends StatelessWidget {
   const NameSetupHelpers({super.key});
@@ -6,18 +7,18 @@ class NameSetupHelpers extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.0),
+      padding: EdgeInsets.symmetric(horizontal: 20.0.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 10),
 
           // Title
-          const Text.rich(
+          Text.rich(
             TextSpan(
               text: 'Welcome to ',
               style: TextStyle(
-                fontSize: 35,
+                fontSize: 35.sp,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w700,
                 color: Colors.black,
@@ -32,13 +33,13 @@ class NameSetupHelpers extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
 
           // Subtitle
-          const Text(
+          Text(
             'What should we call you?',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.sp,
               fontFamily: 'NotoSans',
               fontWeight: FontWeight.w400,
               color: Colors.black87,
