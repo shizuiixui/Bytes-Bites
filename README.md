@@ -35,6 +35,3 @@ Built with an absolute focus on user privacy, the app requires no account creati
 ##  Privacy Policy
 
 Bytes & Bites operates strictly locally. We do not collect, harvest, or transmit any personal data, financial records, or biometric information to external servers. All information is encrypted and stored safely on the user's local device hardware.
-
-![GitHub repos](https://img.shields.io/github/repos/shizuiixui?style=for-the-badge&color=B0DB9C)
-![GitHub top language](https://img.shields.io/github/languages/top/shizuiixui/Bytes-Bites?style=for-the-badge&color=blue)
