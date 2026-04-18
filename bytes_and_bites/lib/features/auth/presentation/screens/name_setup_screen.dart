@@ -2,7 +2,7 @@ import 'package:bytes_and_bites/core/widgets/primary_button.dart';
 import 'package:bytes_and_bites/core/widgets/textbox.dart';
 import 'package:bytes_and_bites/features/auth/presentation/widgets/name_setup_helpers.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class NameSetupScreen extends StatefulWidget {
@@ -88,19 +88,16 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
                     height: 50.h,
                     child: PrimaryButton(
                       text: "Continue",
-                      onPressed: () async {
+                      onPressed: () {
                         String typedName = nameController.text.trim();
 
                         if (typedName.isNotEmpty) {
-                          // To open local database
-                          final prefs = await SharedPreferences.getInstance();
+                          final box = Hive.box('settingsBox');
 
-                          // Save the name
-                          await prefs.setString('user_name', typedName);
+                          box.put('userName', typedName);
 
-                          print("Saved Name: $typedName");
+                          print("Saved Name to Hive: $typedName");
 
-                          // Move to the password screen
                           if (context.mounted) {
                             Navigator.pushReplacementNamed(
                               context,
@@ -131,7 +128,7 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
                         fontSize: 16.sp,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFFB0DB9C),
+                        color: const Color(0xFFB0DB9C),
                       ),
                     ),
                   ),

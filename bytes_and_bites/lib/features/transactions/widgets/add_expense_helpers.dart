@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 
 Widget buildLabel(String text) {
   return Padding(
@@ -21,10 +23,12 @@ Widget buildTextField({
   required TextEditingController controller,
   TextInputType keyboardType = TextInputType.text,
   Widget? prefixIcon,
+  List<TextInputFormatter>? inputFormatters,
 }) {
   return TextFormField(
     controller: controller,
     keyboardType: keyboardType,
+    inputFormatters: inputFormatters,
     style: TextStyle(fontSize: 14.sp, fontFamily: 'Inter'),
     decoration: InputDecoration(
       hintText: hint,

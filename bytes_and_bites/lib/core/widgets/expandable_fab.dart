@@ -68,7 +68,6 @@ class _ExpandableFabState extends State<ExpandableFab>
                 color: const Color(0xFFB0DB9C),
               ),
               onPressed: () {
-                _toggleOpen();
                 Navigator.pushNamed(context, 'add_expense');
               },
             ),
@@ -79,7 +78,6 @@ class _ExpandableFabState extends State<ExpandableFab>
               distance: 80,
               icon: const Icon(Icons.event_repeat, color: Color(0xFFB0DB9C)),
               onPressed: () {
-                _toggleOpen();
                 Navigator.pushNamed(context, 'add_subscription');
               },
             ),
@@ -95,7 +93,6 @@ class _ExpandableFabState extends State<ExpandableFab>
                 color: const Color(0xFFB0DB9C),
               ),
               onPressed: () {
-                _toggleOpen();
                 Navigator.pushNamed(context, 'add_inventory');
               },
             ),
@@ -169,7 +166,11 @@ class _ExpandableFabState extends State<ExpandableFab>
         heroTag: null,
         backgroundColor: Colors.white,
         onPressed: () {
-          _toggleOpen();
+          _controller.reverse();
+          setState(() {
+            _isOpen = false;
+          });
+
           onPressed();
         },
         child: icon,

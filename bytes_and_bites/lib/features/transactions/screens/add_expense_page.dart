@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:bytes_and_bites/core/widgets/primary_button.dart';
-import 'package:bytes_and_bites/core/widgets/categories.dart'; 
-import 'package:bytes_and_bites/features/transactions/widgets/add_expense_helpers.dart'; 
+import 'package:bytes_and_bites/core/widgets/categories.dart';
+import 'package:bytes_and_bites/features/transactions/widgets/add_expense_helpers.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:bytes_and_bites/models/expense_model.dart';
 
 class AddExpensePage extends StatefulWidget {
   const AddExpensePage({super.key});
@@ -163,6 +166,20 @@ class _AddExpensePageState extends State<AddExpensePage> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
+                          // Create the database object
+                          final newExpense = ExpenseModel(
+                            description: _descController.text,
+                            amount: double.parse(_amountController.text),
+                            categoryName: _selectedCategory!.name,
+                            date: _selectedDate,
+                          );
+
+                          // Grab the open database box
+                          final box = Hive.box<ExpenseModel>('expensesBox');
+
+                          // Save it
+                          box.add(newExpense);
+
                           Navigator.pop(context);
 
                           ScaffoldMessenger.of(this.context).showSnackBar(
@@ -181,8 +198,6 @@ class _AddExpensePageState extends State<AddExpensePage> {
                               ),
                             ),
                           );
-
-                          // TODO: Save logic here
 
                           Navigator.pop(this.context);
                         },
@@ -296,7 +311,12 @@ class _AddExpensePageState extends State<AddExpensePage> {
               buildTextField(
                 hint: "Enter Amount",
                 controller: _amountController,
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                ],
                 prefixIcon: Padding(
                   padding: EdgeInsets.all(14.w),
                   child: Text(

@@ -1,7 +1,12 @@
 import 'package:bytes_and_bites/core/widgets/background_card.dart';
 import 'package:bytes_and_bites/core/widgets/profile_avatar.dart';
+import 'package:bytes_and_bites/features/home/screens/notification_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:bytes_and_bites/models/expense_model.dart';
+import 'package:bytes_and_bites/models/subscription_model.dart';
 
 // Home Header
 class HomeHeader extends StatelessWidget {
@@ -77,14 +82,24 @@ class HomeHeader extends StatelessWidget {
           ),
 
           // Notification Icon
-          Container(
-            width: 50.w,
-            height: 50.w,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const NotificationPage(),
+                ),
+              );
+            },
+            child: Container(
+              width: 50.w,
+              height: 50.w,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+              ),
+              child: Icon(Icons.notifications_outlined, size: 25.sp),
             ),
-            child: Icon(Icons.notifications_outlined, size: 25.sp),
           ),
         ],
       ),
@@ -93,14 +108,11 @@ class HomeHeader extends StatelessWidget {
 }
 
 // Total Spent
-class TotalSpent extends StatefulWidget {
-  const TotalSpent({super.key});
+class TotalSpent extends StatelessWidget {
+  final DateTime selectedMonth;
 
-  @override
-  State<TotalSpent> createState() => _TotalSpentState();
-}
+  const TotalSpent({super.key, required this.selectedMonth});
 
-class _TotalSpentState extends State<TotalSpent> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -133,13 +145,31 @@ class _TotalSpentState extends State<TotalSpent> {
                 ),
               ),
               SizedBox(height: 8.h),
-              Text(
-                "\u20B1 1,250.00",
-                style: TextStyle(
-                  fontSize: 35.sp,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.bold,
-                ),
+              ValueListenableBuilder<Box<ExpenseModel>>(
+                valueListenable: Hive.box<ExpenseModel>(
+                  'expensesBox',
+                ).listenable(),
+                builder: (context, box, _) {
+                  // Calculate the total for the selected month
+                  double total = 0;
+                  for (var expense in box.values) {
+                    if (expense.date.month == selectedMonth.month &&
+                        expense.date.year == selectedMonth.year) {
+                      total += expense.amount;
+                    }
+                  }
+                  final formatCurrency = NumberFormat("#,##0.00", "en_US");
+                  final String amountStr = formatCurrency.format(total);
+
+                  return Text(
+                    "\u20B1 $amountStr",
+                    style: TextStyle(
+                      fontSize: 35.sp,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -166,9 +196,7 @@ class _HomeCarouselState extends State<HomeCarousel> {
     super.initState();
     _pageController.addListener(() {
       if (mounted) {
-        setState(() {
-          _currentPage = _pageController.page!;
-        });
+        setState(() => _currentPage = _pageController.page!);
       }
     });
   }
@@ -195,58 +223,178 @@ class _HomeCarouselState extends State<HomeCarousel> {
             ),
           ),
         ),
-        SizedBox(
-          height: 150.h,
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: 3,
-            itemBuilder: (context, index) {
-              double relativePosition = index - _currentPage;
 
-              return Transform(
-                transform: Matrix4.identity()
-                  ..translate(relativePosition * -20.0)
-                  ..scale(1 - (relativePosition.abs() * 0.1)),
-                child: Opacity(
-                  opacity: (1 - (relativePosition.abs() * 0.3)).clamp(0.0, 1.0),
-                  child: Padding(
-                    padding: EdgeInsets.all(8.w),
-                    child: ItemCard(
-                      title: "Subscription $index",
-                      color: Colors.white,
-                      boxShadow: BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8.r,
-                        offset: Offset(0, 4.h),
+        // Hive Listener
+        ValueListenableBuilder<Box<SubscriptionModel>>(
+          valueListenable: Hive.box<SubscriptionModel>(
+            'subscriptionsBox',
+          ).listenable(),
+          builder: (context, box, _) {
+            if (box.isEmpty) {
+              return Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(20.w),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8F9FA),
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.event_busy_rounded,
+                        color: Colors.grey.shade400,
+                        size: 30.sp,
                       ),
-                      subtitle: "Due in 3 days",
-                      price: 150,
-                      imagePath: "",
-                    ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        "No upcoming subscriptions",
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          color: Colors.grey.shade500,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
-            },
-          ),
-        ),
-        SizedBox(height: 6.h),
+            }
 
-        // Pagination Dots
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(3, (index) {
-            bool isActive = _currentPage.round() == index;
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              margin: EdgeInsets.symmetric(horizontal: 4.w),
-              width: isActive ? 20.w : 6.w,
-              height: 6.h,
-              decoration: BoxDecoration(
-                color: isActive ? const Color(0xFFB0DB9C) : Colors.grey,
-                borderRadius: BorderRadius.circular(3.r),
-              ),
+            // Fetch and Sort Data
+            final subscriptions = box.values.toList();
+            subscriptions.sort(
+              (a, b) => a.daysUntilDue.compareTo(b.daysUntilDue),
             );
-          }),
+
+            // Build carousel
+            return Column(
+              children: [
+                SizedBox(
+                  height: 150.h,
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: subscriptions.length,
+                    itemBuilder: (context, index) {
+                      double relativePosition = index - _currentPage;
+                      final sub = subscriptions[index];
+
+                      // Dynamic Urgency Text
+                      String dueText = sub.daysUntilDue == 0
+                          ? "Due Today"
+                          : sub.daysUntilDue < 0
+                          ? "Overdue by ${sub.daysUntilDue.abs()} days"
+                          : "Due in ${sub.daysUntilDue} days";
+
+                      // Turns red if due within 3 days
+                      Color dueColor = sub.daysUntilDue <= 3
+                          ? const Color(0xFFE57373)
+                          : Colors.grey.shade500;
+
+                      return Transform(
+                        transform: Matrix4.identity()
+                          ..translate(relativePosition * -20.0)
+                          ..scale(1 - (relativePosition.abs() * 0.1)),
+                        child: Opacity(
+                          opacity: (1 - (relativePosition.abs() * 0.3)).clamp(
+                            0.0,
+                            1.0,
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(8.w),
+                            child: Container(
+                              padding: EdgeInsets.all(16.w),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 10.r,
+                                    offset: Offset(0, 4.h),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        sub.name,
+                                        style: TextStyle(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Inter',
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.credit_card_rounded,
+                                        color: const Color(0xFFB0DB9C),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 8.h),
+                                  Text(
+                                    "₱${sub.amount.toStringAsFixed(2)}",
+                                    style: TextStyle(
+                                      fontSize: 20.sp,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Poppins',
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    dueText,
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.w600,
+                                      color: dueColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(height: 6.h),
+
+                // Pagination Dots
+                if (subscriptions.length > 1)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(subscriptions.length, (index) {
+                      bool isActive = _currentPage.round() == index;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        margin: EdgeInsets.symmetric(horizontal: 4.w),
+                        width: isActive ? 20.w : 6.w,
+                        height: 6.h,
+                        decoration: BoxDecoration(
+                          color: isActive
+                              ? const Color(0xFFB0DB9C)
+                              : Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(3.r),
+                        ),
+                      );
+                    }),
+                  ),
+              ],
+            );
+          },
         ),
       ],
     );
@@ -258,11 +406,7 @@ class SectionHeader extends StatelessWidget {
   final String title;
   final VoidCallback? onSeeAllTap;
 
-  const SectionHeader({
-    super.key,
-    required this.title,
-    this.onSeeAllTap,
-  });
+  const SectionHeader({super.key, required this.title, this.onSeeAllTap});
 
   @override
   Widget build(BuildContext context) {
@@ -281,15 +425,28 @@ class SectionHeader extends StatelessWidget {
             ),
           ),
           if (onSeeAllTap != null)
-            GestureDetector(
-              onTap: onSeeAllTap,
-              child: Text(
-                "See All",
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontFamily: 'Inter',
-                  color: Colors.grey.shade500,
-                  fontWeight: FontWeight.w500,
+            Material(
+              color:
+                  Colors.transparent,
+              child: InkWell(
+                onTap: onSeeAllTap,
+                borderRadius: BorderRadius.circular(
+                  4.r,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 8.w,
+                    vertical: 4.h,
+                  ),
+                  child: Text(
+                    "See All",
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontFamily: 'Inter',
+                      color: Colors.grey.shade500,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
               ),
             ),

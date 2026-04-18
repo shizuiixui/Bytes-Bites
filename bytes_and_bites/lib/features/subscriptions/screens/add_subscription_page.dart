@@ -3,7 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:bytes_and_bites/core/widgets/primary_button.dart';
 import 'package:bytes_and_bites/core/widgets/categories.dart';
-import 'package:bytes_and_bites/features/transactions/widgets/add_expense_helpers.dart'; 
+import 'package:bytes_and_bites/features/transactions/widgets/add_expense_helpers.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:bytes_and_bites/models/subscription_model.dart';
+import 'package:bytes_and_bites/core/services/notification_service.dart';
 
 class AddSubscriptionPage extends StatefulWidget {
   const AddSubscriptionPage({super.key});
@@ -16,7 +19,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
   final TextEditingController _serviceController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
 
-  SubscriptionCategory? _selectedCategory; // Using the Subscription model
+  SubscriptionCategory? _selectedCategory;
   DateTime _selectedDate = DateTime.now();
 
   void _openCategoryPicker() {
@@ -163,7 +166,24 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                     // Confirm Button
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          //  Create the database object
+                          final newSubscription = SubscriptionModel(
+                            name: _serviceController.text.trim(),
+                            amount:
+                                double.tryParse(_amountController.text) ?? 0.0,
+                            nextBillingDate: _selectedDate,
+                          );
+
+                          // Save it to the Hive box
+                          Hive.box<SubscriptionModel>(
+                            'subscriptionsBox',
+                          ).add(newSubscription);
+
+                          // Schedule Notification
+                          await NotificationService()
+                              .scheduleSubscriptionAlerts(newSubscription);
+
                           Navigator.pop(context);
 
                           ScaffoldMessenger.of(this.context).showSnackBar(
@@ -183,9 +203,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                             ),
                           );
 
-                          // TODO: Save logic here
-
-                          Navigator.pop(this.context);
+                          Navigator.pop(this.context); // Return to home page
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFB0DB9C),

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:bytes_and_bites/core/widgets/primary_button.dart';
-import 'package:bytes_and_bites/core/widgets/categories.dart'; 
-import 'package:bytes_and_bites/features/transactions/widgets/add_expense_helpers.dart'; 
+import 'package:bytes_and_bites/core/widgets/categories.dart';
+import 'package:bytes_and_bites/features/transactions/widgets/add_expense_helpers.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:bytes_and_bites/models/inventory_model.dart';
 
 class AddInventoryPage extends StatefulWidget {
   const AddInventoryPage({super.key});
@@ -13,7 +15,7 @@ class AddInventoryPage extends StatefulWidget {
 
 class _AddInventoryPageState extends State<AddInventoryPage> {
   final TextEditingController _itemNameController = TextEditingController();
-  
+
   InventoryCategory? _selectedCategory;
   int _quantity = 1;
 
@@ -172,6 +174,16 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
+                          // Create the Hive object
+                          final newItem = InventoryModel(
+                            name: _itemNameController.text,
+                            quantity: _quantity,
+                            categoryName: _selectedCategory!.name,
+                          );
+
+                          // Save to Hive
+                          Hive.box<InventoryModel>('inventoryBox').add(newItem);
+
                           Navigator.pop(context);
 
                           ScaffoldMessenger.of(this.context).showSnackBar(
@@ -190,8 +202,6 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                               ),
                             ),
                           );
-
-                          // TODO: Save logic here
 
                           Navigator.pop(this.context);
                         },
@@ -271,7 +281,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
               // UI Helpers
               buildLabel("Item Name"),
               buildTextField(
-                hint: "Pancit Canton",
+                hint: "Enter item name",
                 controller: _itemNameController,
               ),
 

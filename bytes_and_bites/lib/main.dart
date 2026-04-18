@@ -1,9 +1,35 @@
 import 'package:bytes_and_bites/core/widgets/splash_screen.dart';
+import 'package:bytes_and_bites/models/inventory_model.dart';
+import 'package:bytes_and_bites/models/subscription_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'core/routes/app_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:bytes_and_bites/models/expense_model.dart';
+import 'package:bytes_and_bites/core/services/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive
+  await Hive.initFlutter();
+  
+  // Register adapters
+  Hive.registerAdapter(ExpenseModelAdapter());
+  Hive.registerAdapter(InventoryModelAdapter());
+  Hive.registerAdapter(SubscriptionModelAdapter());
+  
+  // Open Boxes
+  await Hive.openBox<ExpenseModel>('expensesBox');
+  await Hive.openBox<InventoryModel>('inventoryBox');
+  await Hive.openBox<SubscriptionModel>('subscriptionsBox');
+  await Hive.openBox('settingsBox'); 
+
+  // Initialize Notifications
+  final notifService = NotificationService();
+  await notifService.init();
+  await notifService.requestPermissions();
+
   runApp(const BytesAndBitesApp());
 }
 

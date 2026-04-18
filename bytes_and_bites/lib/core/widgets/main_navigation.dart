@@ -1,4 +1,7 @@
 import 'package:bytes_and_bites/core/widgets/expandable_fab.dart';
+import 'package:bytes_and_bites/features/inventory/screens/inventory_page.dart';
+import 'package:bytes_and_bites/features/profile/screens/profile_page.dart';
+import 'package:bytes_and_bites/features/transactions/screens/expense_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bytes_and_bites/core/widgets/bottom_nav_bar.dart';
@@ -27,25 +30,19 @@ class _MainNavigationState extends State<MainNavigation> {
         index: _selectedIndex,
         children: [
           HomePage(
-            onProfileTap: () {
-              setState(() {
-                _selectedIndex = 3;
-              });
-            },
+            onProfileTap: () => _onItemTapped(3),
+            onTransactionsTap: () => _onItemTapped(1),
+            onInventoryTap: () => _onItemTapped(2),
           ),
 
           // Index 1 : Transaction Page
-          const Center(
-            child: Text("Transaction Page", style: TextStyle(fontSize: 24)),
-          ),
+          const ExpensePage(),
+
           // Index 2 : Inventory Page
-          const Center(
-            child: Text("Inventory Page", style: TextStyle(fontSize: 24)),
-          ),
+          const InventoryPage(),
+
           // Index 3 : Profile Page
-          const Center(
-            child: Text("Profile Page", style: TextStyle(fontSize: 24)),
-          ),
+          const ProfilePage(),
         ],
       ),
       // Bottom Navigation Bar

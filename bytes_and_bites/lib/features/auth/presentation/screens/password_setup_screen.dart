@@ -1,6 +1,6 @@
 import 'package:bytes_and_bites/features/auth/presentation/widgets/password_setup_helpers.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PasswordSetupScreen extends StatefulWidget {
@@ -13,25 +13,24 @@ class PasswordSetupScreen extends StatefulWidget {
 class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
   String _pin = "";
 
-  void _onNumberPressed(String number) async {
+  void _onNumberPressed(String number) {
     setState(() {
       if (_pin.length < 4) {
         _pin += number;
       }
     });
+
     if (_pin.length == 4) {
-      //  Open the local database
-      final prefs = await SharedPreferences.getInstance();
+      // Open the local Hive settings box
+      final box = Hive.box('settingsBox');
 
-      //  Save the Passcode
-      await prefs.setString('user_passcode', _pin);
+      // Save Passcode
+      box.put('user_passcode', _pin);
+      box.put('is_first_time', false);
 
-      // Mark that the user has completed the setup
-      await prefs.setBool('is_first_time', false);
+      print("Saved Passcode to Hive: $_pin");
 
-      print("Saved Passcode: $_pin");
-
-      // Navigate to Home
+      // 3. Navigate to Home
       if (mounted) {
         Navigator.pushReplacementNamed(context, 'homepage');
       }
@@ -96,6 +95,7 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
               padding: EdgeInsets.only(bottom: 20.h),
               child: TextButton(
                 onPressed: () {
+                  Hive.box('settingsBox').put('is_first_time', false);
                   Navigator.pushReplacementNamed(context, 'homepage');
                 },
                 child: Text(
@@ -104,7 +104,7 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
                     fontSize: 16.sp,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFFB0DB9C),
+                    color: const Color(0xFFB0DB9C),
                   ),
                 ),
               ),

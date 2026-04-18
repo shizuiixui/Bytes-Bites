@@ -1,13 +1,26 @@
-import 'package:bytes_and_bites/features/home/widgets/homepage_helpers.dart';
-import 'package:bytes_and_bites/core/widgets/background_card.dart';
+import 'package:bytes_and_bites/features/inventory/screens/inventory_page.dart';
+import 'package:bytes_and_bites/features/transactions/screens/expense_page.dart';
 import 'package:flutter/material.dart';
-import 'package:bytes_and_bites/features/home/widgets/month_picker_sheet.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:bytes_and_bites/features/home/widgets/month_picker_sheet.dart';
+import 'package:bytes_and_bites/features/home/widgets/homepage_helpers.dart';
+import 'package:bytes_and_bites/models/expense_model.dart';
+import 'package:bytes_and_bites/features/transactions/widgets/transaction_card.dart';
+import 'package:bytes_and_bites/models/inventory_model.dart';
+import 'package:bytes_and_bites/features/inventory/widgets/inventory_card.dart';
 
 class HomePage extends StatefulWidget {
   final VoidCallback onProfileTap;
+  final VoidCallback onTransactionsTap;
+  final VoidCallback onInventoryTap;
 
-  const HomePage({super.key, required this.onProfileTap});
+  const HomePage({
+    super.key,
+    required this.onProfileTap,
+    required this.onTransactionsTap,
+    required this.onInventoryTap,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -38,24 +51,36 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.white,
       body: CustomScrollView(
         slivers: [
-          // Header
           SliverToBoxAdapter(
             child: SafeArea(
               bottom: false,
               child: Padding(
                 padding: EdgeInsets.fromLTRB(24.w, 10.h, 24.w, 10.h),
-                child: HomeHeader(
-                  userName: 'User',
-                  onProfileTap: widget.onProfileTap,
-                  currentDate: _selectedDate,
-                  onCalendarTap: _openMonthPicker,
+                child: ValueListenableBuilder<Box>(
+                  valueListenable: Hive.box(
+                    'settingsBox',
+                  ).listenable(keys: ['userName']),
+                  builder: (context, box, _) {
+                    // Fetch name
+                    String currentName = box.get(
+                      'userName',
+                      defaultValue: 'User',
+                    );
+
+                    return HomeHeader(
+                      userName: currentName,
+                      onProfileTap: widget.onProfileTap,
+                      currentDate: _selectedDate,
+                      onCalendarTap: _openMonthPicker,
+                    );
+                  },
                 ),
               ),
             ),
           ),
 
           // Total Spent Card
-          const SliverToBoxAdapter(child: TotalSpent()),
+          SliverToBoxAdapter(child: TotalSpent(selectedMonth: _selectedDate)),
 
           // Upcoming Subscriptions
           const SliverToBoxAdapter(child: HomeCarousel()),
@@ -66,48 +91,51 @@ class _HomePageState extends State<HomePage> {
               padding: EdgeInsets.only(top: 10.h),
               child: SectionHeader(
                 title: "Recent Transactions",
-                onSeeAllTap: () {
-                  // Navigate to full transaction history
-                },
+                onSeeAllTap: widget.onTransactionsTap,
               ),
             ),
           ),
 
           // Recent Transactions List
           SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Column(
-                children: [
-                  ItemCard(
-                    title: "SM Supermarket",
-                    subtitle: "Today, 2:30 PM",
-                    subtitleColor: Colors.grey.shade500,
-                    color: Colors.white,
-                    boxShadow: BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 10.r,
-                      offset: Offset(0, 4.h),
+            child: ValueListenableBuilder<Box<ExpenseModel>>(
+              valueListenable: Hive.box<ExpenseModel>(
+                'expensesBox',
+              ).listenable(),
+              builder: (context, box, _) {
+                final expenses = box.values
+                    .where(
+                      (e) =>
+                          e.date.month == _selectedDate.month &&
+                          e.date.year == _selectedDate.year,
+                    )
+                    .toList();
+
+                expenses.sort((a, b) => b.date.compareTo(a.date));
+                final recentExpenses = expenses.take(3).toList();
+
+                if (recentExpenses.isEmpty) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 24.w,
+                      vertical: 10.h,
                     ),
-                    price: 850,
-                    imagePath: "",
-                  ),
-                  SizedBox(height: 10.h),
-                  ItemCard(
-                    title: "Spotify Premium",
-                    subtitle: "Yesterday",
-                    subtitleColor: Colors.grey.shade500,
-                    color: Colors.white,
-                    boxShadow: BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 10.r,
-                      offset: Offset(0, 4.h),
+                    child: Text(
+                      "No transactions yet.",
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        color: Colors.grey.shade500,
+                      ),
                     ),
-                    price: 149,
-                    imagePath: "",
-                  ),
-                ],
-              ),
+                  );
+                }
+
+                return Column(
+                  children: recentExpenses
+                      .map((tx) => TransactionCard(expense: tx))
+                      .toList(),
+                );
+              },
             ),
           ),
 
@@ -117,52 +145,48 @@ class _HomePageState extends State<HomePage> {
               padding: EdgeInsets.only(top: 20.h),
               child: SectionHeader(
                 title: "Low Stock Alerts",
-                onSeeAllTap: () {
-                  // Navigate to full inventory
-                },
+                onSeeAllTap: widget.onInventoryTap,
               ),
             ),
           ),
 
-          // Low Stock Inventory List
+          // Inventory List
           SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Column(
-                children: [
-                  ItemCard(
-                    title: "Lucky Me! Pancit Canton",
-                    subtitle: "Only 2 packs left!",
-                    subtitleColor: const Color(0xFFFF6B6B),
-                    color: Colors.white,
-                    boxShadow: BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 10.r,
-                      offset: Offset(0, 4.h),
-                    ),
-                    price: 40,
-                    imagePath: "",
-                  ),
-                  SizedBox(height: 10.h),
-                  ItemCard(
-                    title: "Nescafe 3-in-1 Coffee",
-                    subtitle: "Only 4 sticks left!",
-                    subtitleColor: const Color(0xFFFF6B6B),
-                    color: Colors.white,
-                    boxShadow: BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 10.r,
-                      offset: Offset(0, 4.h),
-                    ),
-                    price: 60,
-                    imagePath: "",
-                  ),
+            child: ValueListenableBuilder<Box<InventoryModel>>(
+              valueListenable: Hive.box<InventoryModel>(
+                'inventoryBox',
+              ).listenable(),
+              builder: (context, box, _) {
+                final lowStockItems = box.values
+                    .where((item) => item.quantity <= item.lowStockThreshold)
+                    .toList();
 
-                  SizedBox(height: 120.h),
-                ],
-              ),
+                if (lowStockItems.isEmpty) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 24.w,
+                      vertical: 10.h,
+                    ),
+                    child: Text(
+                      "All stock levels are good!",
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: lowStockItems.take(3).map((item) {
+                    return InventoryCard(item: item);
+                  }).toList(),
+                );
+              },
             ),
           ),
+
+          SliverToBoxAdapter(child: SizedBox(height: 120.h)),
         ],
       ),
     );
