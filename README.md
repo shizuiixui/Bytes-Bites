@@ -23,15 +23,6 @@ Built with an absolute focus on user privacy, the app requires no account creati
 * **Offline-First Architecture:** No internet connection required. Your data never leaves your phone.
 * **Categorized Expense Tracking:** Keep track of rent, food, and subscriptions with visual indicators.
 
-
-##  Built With
-
-* **Framework:** [Flutter](https://flutter.dev/)
-* **Language:** Dart
-* **Local Storage:** `shared_preferences`
-* **Security:** `local_auth`, `flutter_secure_storage`
-* **Design:** Figma
-
 ##  Privacy Policy
 
 Bytes & Bites operates strictly locally. We do not collect, harvest, or transmit any personal data, financial records, or biometric information to external servers. All information is encrypted and stored safely on the user's local device hardware.
