@@ -19,7 +19,7 @@ Built with an absolute focus on user privacy, the app requires no account creati
 
 * **Unified Dashboard:** See your total spending and critical low-stock pantry items on a single screen.
 * **Lightning-Fast Inventory:** Update your pantry stock directly from the list view with a single tap (no deep menus).
-* **Biometric & PIN Security:** Lock your financial data behind Face ID, Touch ID, or a custom 4-digit PIN.
+* **PIN Security:** Lock your financial data behind a custom 4-digit PIN.
 * **Offline-First Architecture:** No internet connection required. Your data never leaves your phone.
 * **Categorized Expense Tracking:** Keep track of rent, food, and subscriptions with visual indicators.
 
