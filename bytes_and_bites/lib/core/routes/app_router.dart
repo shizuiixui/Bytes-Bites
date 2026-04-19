@@ -1,5 +1,4 @@
 import 'package:bytes_and_bites/core/widgets/main_navigation.dart';
-import 'package:bytes_and_bites/features/home/screens/homepage.dart';
 import 'package:bytes_and_bites/features/inventory/screens/add_inventory_page.dart';
 import 'package:bytes_and_bites/features/inventory/screens/inventory_page.dart';
 import 'package:bytes_and_bites/features/subscriptions/screens/add_subscription_page.dart';

@@ -1,4 +1,3 @@
-import 'package:bytes_and_bites/core/widgets/background_card.dart';
 import 'package:bytes_and_bites/core/widgets/profile_avatar.dart';
 import 'package:bytes_and_bites/features/home/screens/notification_page.dart';
 import 'package:flutter/material.dart';

@@ -5,9 +5,6 @@ import 'package:bytes_and_bites/features/profile/screens/terms_and_conditions.da
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:bytes_and_bites/models/expense_model.dart';
-import 'package:intl/intl.dart';
 import 'package:bytes_and_bites/features/home/widgets/homepage_helpers.dart';
 
 class ProfilePage extends StatefulWidget {
