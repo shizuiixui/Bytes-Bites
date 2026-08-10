@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 
 import 'package:bytes_and_bites/models/inventory_model.dart';
 import 'package:bytes_and_bites/features/inventory/widgets/inventory_card.dart';
@@ -126,7 +127,7 @@ class _InventoryPageState extends State<InventoryPage> {
           Expanded(
             child: ValueListenableBuilder<Box<InventoryModel>>(
               // Listen to the Hive box for changes
-              valueListenable: Hive.box<InventoryModel>('inventoryBox').listenable(),
+              valueListenable: HiveBoxManager.inventoryBox().listenable(),
               builder: (context, box, _) {
                 final allItems = box.values.toList();
                 

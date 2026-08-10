@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 import 'package:bytes_and_bites/models/inventory_model.dart';
 import 'package:bytes_and_bites/models/subscription_model.dart';
 
@@ -30,12 +31,10 @@ class NotificationPage extends StatelessWidget {
         ),
       ),
       body: ValueListenableBuilder<Box<InventoryModel>>(
-        valueListenable: Hive.box<InventoryModel>('inventoryBox').listenable(),
+        valueListenable: HiveBoxManager.inventoryBox().listenable(),
         builder: (context, inventoryBox, _) {
           return ValueListenableBuilder<Box<SubscriptionModel>>(
-            valueListenable: Hive.box<SubscriptionModel>(
-              'subscriptionsBox',
-            ).listenable(),
+            valueListenable: HiveBoxManager.subscriptionsBox().listenable(),
             builder: (context, subBox, _) {
               List<Widget> notificationTiles = [];
 

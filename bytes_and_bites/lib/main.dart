@@ -7,6 +7,7 @@ import 'core/routes/app_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:bytes_and_bites/models/expense_model.dart';
 import 'package:bytes_and_bites/core/services/notification_service.dart';
+import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,10 +21,14 @@ void main() async {
   Hive.registerAdapter(SubscriptionModelAdapter());
   
   // Open Boxes
-  await Hive.openBox<ExpenseModel>('expensesBox');
-  await Hive.openBox<InventoryModel>('inventoryBox');
-  await Hive.openBox<SubscriptionModel>('subscriptionsBox');
-  await Hive.openBox('settingsBox'); 
+  await Hive.openBox('settingsBox');
+
+  final settingsBox = Hive.box('settingsBox');
+  final isFirstTime = settingsBox.get('is_first_time', defaultValue: true) as bool;
+
+  if (!isFirstTime) {
+    await HiveBoxManager.openUserDataBoxes();
+  }
 
   // Initialize Notifications
   final notifService = NotificationService();

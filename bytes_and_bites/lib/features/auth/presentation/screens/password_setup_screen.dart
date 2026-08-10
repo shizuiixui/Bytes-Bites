@@ -1,4 +1,5 @@
 import 'package:bytes_and_bites/features/auth/presentation/widgets/password_setup_helpers.dart';
+import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -13,7 +14,7 @@ class PasswordSetupScreen extends StatefulWidget {
 class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
   String _pin = "";
 
-  void _onNumberPressed(String number) {
+  Future<void> _onNumberPressed(String number) async {
     setState(() {
       if (_pin.length < 4) {
         _pin += number;
@@ -27,6 +28,8 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
       // Save Passcode
       box.put('user_passcode', _pin);
       box.put('is_first_time', false);
+
+      await HiveBoxManager.openUserDataBoxes();
 
       print("Saved Passcode to Hive: $_pin");
 
@@ -94,8 +97,9 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
             Padding(
               padding: EdgeInsets.only(bottom: 20.h),
               child: TextButton(
-                onPressed: () {
+                onPressed: () async {
                   Hive.box('settingsBox').put('is_first_time', false);
+                  await HiveBoxManager.openUserDataBoxes();
                   Navigator.pushReplacementNamed(context, 'homepage');
                 },
                 child: Text(

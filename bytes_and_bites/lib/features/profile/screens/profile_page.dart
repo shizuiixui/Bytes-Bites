@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 import 'package:bytes_and_bites/features/home/widgets/homepage_helpers.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -20,11 +21,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _handleLogout() async {
     final prefs = await SharedPreferences.getInstance();
-    final settingsBox = Hive.box('settingsBox');
 
     await prefs.setBool('is_first_time', true);
-    await settingsBox.delete('userName');
-    await settingsBox.delete('user_passcode');
   }
 
   // Logout Confirmation Modal
@@ -115,6 +113,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                       'landing_page',
                                       (route) => false,
                                     );
+
+                                    HiveBoxManager.closeUserDataBoxes();
                                   },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFE57373),
@@ -212,7 +212,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       SizedBox(height: 16.h),
                       Text(
-                        userName, // Live updated name!
+                        userName,
                         style: TextStyle(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.bold,

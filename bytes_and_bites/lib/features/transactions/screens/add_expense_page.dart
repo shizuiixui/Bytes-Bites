@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:bytes_and_bites/core/widgets/primary_button.dart';
 import 'package:bytes_and_bites/core/widgets/categories.dart';
+import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 import 'package:bytes_and_bites/features/transactions/widgets/add_expense_helpers.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:bytes_and_bites/models/expense_model.dart';
@@ -175,7 +176,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                           );
 
                           // Grab the open database box
-                          final box = Hive.box<ExpenseModel>('expensesBox');
+                          final box = HiveBoxManager.expensesBox();
 
                           // Save it
                           box.add(newExpense);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 import 'package:bytes_and_bites/features/home/widgets/month_picker_sheet.dart';
 import 'package:bytes_and_bites/features/home/widgets/homepage_helpers.dart';
 import 'package:bytes_and_bites/models/expense_model.dart';
@@ -55,9 +56,7 @@ class _HomePageState extends State<HomePage> {
               child: Padding(
                 padding: EdgeInsets.fromLTRB(24.w, 10.h, 24.w, 10.h),
                 child: ValueListenableBuilder<Box>(
-                  valueListenable: Hive.box(
-                    'settingsBox',
-                  ).listenable(keys: ['userName']),
+                  valueListenable: Hive.box('settingsBox').listenable(keys: ['userName']),
                   builder: (context, box, _) {
                     // Fetch name
                     String currentName = box.get(
@@ -97,9 +96,7 @@ class _HomePageState extends State<HomePage> {
           // Recent Transactions List
           SliverToBoxAdapter(
             child: ValueListenableBuilder<Box<ExpenseModel>>(
-              valueListenable: Hive.box<ExpenseModel>(
-                'expensesBox',
-              ).listenable(),
+              valueListenable: HiveBoxManager.expensesBox().listenable(),
               builder: (context, box, _) {
                 final expenses = box.values
                     .where(
@@ -151,9 +148,7 @@ class _HomePageState extends State<HomePage> {
           // Inventory List
           SliverToBoxAdapter(
             child: ValueListenableBuilder<Box<InventoryModel>>(
-              valueListenable: Hive.box<InventoryModel>(
-                'inventoryBox',
-              ).listenable(),
+              valueListenable: HiveBoxManager.inventoryBox().listenable(),
               builder: (context, box, _) {
                 final lowStockItems = box.values
                     .where((item) => item.quantity <= item.lowStockThreshold)

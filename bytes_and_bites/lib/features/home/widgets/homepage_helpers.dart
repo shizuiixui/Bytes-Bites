@@ -1,5 +1,6 @@
 import 'package:bytes_and_bites/core/widgets/profile_avatar.dart';
 import 'package:bytes_and_bites/features/home/screens/notification_page.dart';
+import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -145,9 +146,7 @@ class TotalSpent extends StatelessWidget {
               ),
               SizedBox(height: 8.h),
               ValueListenableBuilder<Box<ExpenseModel>>(
-                valueListenable: Hive.box<ExpenseModel>(
-                  'expensesBox',
-                ).listenable(),
+                valueListenable: HiveBoxManager.expensesBox().listenable(),
                 builder: (context, box, _) {
                   // Calculate the total for the selected month
                   double total = 0;
@@ -225,9 +224,7 @@ class _HomeCarouselState extends State<HomeCarousel> {
 
         // Hive Listener
         ValueListenableBuilder<Box<SubscriptionModel>>(
-          valueListenable: Hive.box<SubscriptionModel>(
-            'subscriptionsBox',
-          ).listenable(),
+          valueListenable: HiveBoxManager.subscriptionsBox().listenable(),
           builder: (context, box, _) {
             if (box.isEmpty) {
               return Padding(

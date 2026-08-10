@@ -1,6 +1,7 @@
+import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
+import 'package:bytes_and_bites/core/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:bytes_and_bites/core/widgets/primary_button.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class ChangeNamePage extends StatefulWidget {
@@ -18,13 +19,21 @@ class _ChangeNamePageState extends State<ChangeNamePage> {
   void initState() {
     super.initState();
     _settingsBox = Hive.box('settingsBox');
-    String currentName = _settingsBox.get('userName', defaultValue: 'User');
+    final currentName = _settingsBox.get('userName', defaultValue: 'User');
     _nameController = TextEditingController(text: currentName);
   }
 
-  void _saveName() {
-    if (_nameController.text.trim().isEmpty) return;
-    _settingsBox.put('userName', _nameController.text.trim());
+  Future<void> _saveName() async {
+    final newName = _nameController.text.trim();
+    if (newName.isEmpty) return;
+
+    final oldName = _settingsBox.get('userName', defaultValue: 'User') as String;
+
+    await HiveBoxManager.closeUserDataBoxes(userName: oldName);
+    _settingsBox.put('userName', newName);
+    await HiveBoxManager.openUserDataBoxes(userName: newName);
+
+    if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -85,8 +94,6 @@ class _ChangeNamePageState extends State<ChangeNamePage> {
                 ),
               ),
               SizedBox(height: 24.h),
-
-              // Input Field
               TextFormField(
                 controller: _nameController,
                 style: TextStyle(
@@ -118,9 +125,8 @@ class _ChangeNamePageState extends State<ChangeNamePage> {
                   ),
                 ),
               ),
-
               const Spacer(),
-              PrimaryButton(text: "Save Changes", onPressed: _saveName),
+              PrimaryButton(text: "Save Changes", onPressed: () => _saveName()),
               SizedBox(height: 20.h),
             ],
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 import 'package:bytes_and_bites/features/home/widgets/month_picker_sheet.dart';
 import 'package:bytes_and_bites/models/expense_model.dart';
 import 'package:bytes_and_bites/features/transactions/widgets/transaction_card.dart'; 
@@ -85,7 +86,7 @@ class _ExpensePageState extends State<ExpensePage> {
             // Database Listener & Transaction List
             Expanded(
               child: ValueListenableBuilder<Box<ExpenseModel>>(
-                valueListenable: Hive.box<ExpenseModel>('expensesBox').listenable(),
+                valueListenable: HiveBoxManager.expensesBox().listenable(),
                 builder: (context, box, _) {
                   final List<ExpenseModel> allExpenses = box.values.toList();
                   final List<ExpenseModel> filteredExpenses = allExpenses.where((expense) {

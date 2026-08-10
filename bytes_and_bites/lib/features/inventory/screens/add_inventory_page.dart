@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:bytes_and_bites/core/widgets/primary_button.dart';
 import 'package:bytes_and_bites/core/widgets/categories.dart';
+import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 import 'package:bytes_and_bites/features/transactions/widgets/add_expense_helpers.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:bytes_and_bites/models/inventory_model.dart';
@@ -182,7 +183,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                           );
 
                           // Save to Hive
-                          Hive.box<InventoryModel>('inventoryBox').add(newItem);
+                          HiveBoxManager.inventoryBox().add(newItem);
 
                           Navigator.pop(context);
 
