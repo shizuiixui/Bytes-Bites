@@ -13,34 +13,56 @@ class PasswordSetupScreen extends StatefulWidget {
 
 class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
   String _pin = "";
+  bool _isLoading = false; 
 
   Future<void> _onNumberPressed(String number) async {
-    setState(() {
-      if (_pin.length < 4) {
+    if (_isLoading) return;
+
+    if (_pin.length < 4) {
+      setState(() {
         _pin += number;
-      }
-    });
+      });
+    }
 
     if (_pin.length == 4) {
-      // Open the local Hive settings box
-      final box = Hive.box('settingsBox');
+      setState(() {
+        _isLoading = true;
+      });
 
-      // Save Passcode
-      box.put('user_passcode', _pin);
-      box.put('is_first_time', false);
+      try {
+        // Open the local Hive settings box
+        final box = Hive.box('settingsBox');
 
-      await HiveBoxManager.openUserDataBoxes();
+        // Save Passcode
+        await box.put('user_passcode', _pin);
+        await box.put('is_first_time', false);
 
-      print("Saved Passcode to Hive: $_pin");
+        await HiveBoxManager.openUserDataBoxes();
 
-      // 3. Navigate to Home
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, 'homepage');
+        print("Saved Passcode to Hive: $_pin");
+
+        // Navigate to Home
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, 'homepage');
+        }
+      } catch (e) {
+        // Handle potential errors
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _pin = ""; // Reset PIN
+          });
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to set passcode: $e')));
+        }
       }
     }
   }
 
   void _onDeletePressed() {
+    if (_isLoading) return; 
+
     setState(() {
       if (_pin.isNotEmpty) {
         _pin = _pin.substring(0, _pin.length - 1);
@@ -82,12 +104,20 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
 
                     SizedBox(height: 40.h),
 
-                    // Custom Numpad
-                    CustomNumpad(
-                      onNumberPressed: _onNumberPressed,
-                      onDeletePressed: _onDeletePressed,
-                      onBiometricsPressed: () => print("Trigger Biometrics"),
-                    ),
+                    //  Custom Numpad
+                    if (_isLoading)
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40.h),
+                        child: const CircularProgressIndicator(
+                          color: Color(0xFFB0DB9C),
+                        ),
+                      )
+                    else
+                      CustomNumpad(
+                        onNumberPressed: _onNumberPressed,
+                        onDeletePressed: _onDeletePressed,
+                        onBiometricsPressed: () => print("Trigger Biometrics"),
+                      ),
                   ],
                 ),
               ),
@@ -97,18 +127,25 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
             Padding(
               padding: EdgeInsets.only(bottom: 20.h),
               child: TextButton(
-                onPressed: () async {
-                  Hive.box('settingsBox').put('is_first_time', false);
-                  await HiveBoxManager.openUserDataBoxes();
-                  Navigator.pushReplacementNamed(context, 'homepage');
-                },
+                onPressed: _isLoading
+                    ? null 
+                    : () async {
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        Hive.box('settingsBox').put('is_first_time', false);
+                        await HiveBoxManager.openUserDataBoxes();
+                        if (context.mounted) {
+                          Navigator.pushReplacementNamed(context, 'homepage');
+                        }
+                      },
                 child: Text(
                   'Skip for now',
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFFB0DB9C),
+                    color: _isLoading ? Colors.grey : const Color(0xFFB0DB9C),
                   ),
                 ),
               ),
