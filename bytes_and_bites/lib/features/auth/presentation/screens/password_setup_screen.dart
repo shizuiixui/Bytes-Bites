@@ -13,57 +13,97 @@ class PasswordSetupScreen extends StatefulWidget {
 
 class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
   String _pin = "";
-  bool _isLoading = false; 
+  bool _isLoading = false;
+  bool _hasError = false;
+
+  // State variables to determine which mode the screen is in
+  bool _isSetupMode = true;
+  String? _savedPasscode;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkMode();
+  }
+
+  void _checkMode() {
+    // Check if the user already has a saved passcode
+    final box = Hive.box('settingsBox');
+    _savedPasscode = box.get('user_passcode');
+
+    setState(() {
+      // If a passcode exists and is not empty, Unlock Mode
+      _isSetupMode = _savedPasscode == null || _savedPasscode!.isEmpty;
+    });
+  }
 
   Future<void> _onNumberPressed(String number) async {
     if (_isLoading) return;
 
-    if (_pin.length < 4) {
-      setState(() {
+    setState(() {
+      _hasError = false; // Clear error state on typing
+      if (_pin.length < 4) {
         _pin += number;
-      });
-    }
+      }
+    });
 
     if (_pin.length == 4) {
       setState(() {
         _isLoading = true;
       });
 
+      final box = Hive.box('settingsBox');
+
       try {
-        // Open the local Hive settings box
-        final box = Hive.box('settingsBox');
+        if (_isSetupMode) {
+          // Setup New Passcode
+          await box.put('user_passcode', _pin);
+          await box.put('is_first_time', false);
+          await box.put('is_logged_in', true);
 
-        // Save Passcode
-        await box.put('user_passcode', _pin);
-        await box.put('is_first_time', false);
+          await HiveBoxManager.openUserDataBoxes();
+          print("Saved New Passcode to Hive: $_pin");
 
-        await HiveBoxManager.openUserDataBoxes();
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, 'homepage');
+          }
+        } else {
+          // Validate Existing Passcode
+          if (_pin == _savedPasscode) {
+            await box.put('is_logged_in', true);
+            await HiveBoxManager.openUserDataBoxes();
 
-        print("Saved Passcode to Hive: $_pin");
-
-        // Navigate to Home
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, 'homepage');
+            if (mounted) {
+              Navigator.pushReplacementNamed(context, 'homepage');
+            }
+          } else {
+            // Incorrect PIN entered
+            setState(() {
+              _isLoading = false;
+              _hasError = true;
+              _pin = ""; // Reset for retry
+            });
+          }
         }
       } catch (e) {
-        // Handle potential errors
         if (mounted) {
           setState(() {
             _isLoading = false;
-            _pin = ""; // Reset PIN
+            _pin = "";
           });
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Failed to set passcode: $e')));
+          ).showSnackBar(SnackBar(content: Text('Error: $e')));
         }
       }
     }
   }
 
   void _onDeletePressed() {
-    if (_isLoading) return; 
+    if (_isLoading) return;
 
     setState(() {
+      _hasError = false;
       if (_pin.isNotEmpty) {
         _pin = _pin.substring(0, _pin.length - 1);
       }
@@ -94,17 +134,55 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
 
                     SizedBox(height: 20.h),
 
-                    // Custom Text Helper
-                    const PasswordSetupHelpers(),
+                    if (_isSetupMode)
+                      const PasswordSetupHelpers()
+                    else
+                      Column(
+                        children: [
+                          Text(
+                            "Welcome Back",
+                            style: TextStyle(
+                              fontSize: 24.sp,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins',
+                              color: Colors.black87,
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            "Enter your passcode to unlock",
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontFamily: 'Inter',
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
 
                     SizedBox(height: 30.h),
 
                     // Custom Dots Helper
                     PasscodeIndicator(pinLength: _pin.length),
 
-                    SizedBox(height: 40.h),
+                    // Error Message
+                    if (_hasError)
+                      Padding(
+                        padding: EdgeInsets.only(top: 16.h),
+                        child: Text(
+                          "Incorrect passcode. Try again.",
+                          style: TextStyle(
+                            color: const Color(0xFFE57373),
+                            fontSize: 14.sp,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
 
-                    //  Custom Numpad
+                    SizedBox(height: _hasError ? 24.h : 40.h),
+
+                    // Custom Numpad
                     if (_isLoading)
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 40.h),
@@ -123,33 +201,40 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
               ),
             ),
 
-            // Bottom Section
-            Padding(
-              padding: EdgeInsets.only(bottom: 20.h),
-              child: TextButton(
-                onPressed: _isLoading
-                    ? null 
-                    : () async {
-                        setState(() {
-                          _isLoading = true;
-                        });
-                        Hive.box('settingsBox').put('is_first_time', false);
-                        await HiveBoxManager.openUserDataBoxes();
-                        if (context.mounted) {
-                          Navigator.pushReplacementNamed(context, 'homepage');
-                        }
-                      },
-                child: Text(
-                  'Skip for now',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w700,
-                    color: _isLoading ? Colors.grey : const Color(0xFFB0DB9C),
+            //  Only show Skip button if we are setting up a new pin
+            if (_isSetupMode)
+              Padding(
+                padding: EdgeInsets.only(bottom: 20.h),
+                child: TextButton(
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          await Future.delayed(
+                            const Duration(milliseconds: 1500),
+                          );
+                          final box = Hive.box('settingsBox');
+                          await box.put('is_first_time', false);
+                          await box.put('is_logged_in', true);
+
+                          await HiveBoxManager.openUserDataBoxes();
+                          if (context.mounted) {
+                            Navigator.pushReplacementNamed(context, 'homepage');
+                          }
+                        },
+                  child: Text(
+                    'Skip for now',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w700,
+                      color: _isLoading ? Colors.grey : const Color(0xFFB0DB9C),
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),

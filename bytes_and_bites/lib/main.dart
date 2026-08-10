@@ -14,20 +14,34 @@ void main() async {
 
   // Initialize Hive
   await Hive.initFlutter();
-  
+
   // Register adapters
   Hive.registerAdapter(ExpenseModelAdapter());
   Hive.registerAdapter(InventoryModelAdapter());
   Hive.registerAdapter(SubscriptionModelAdapter());
-  
-  // Open Boxes
+
+  // Open Settings Box first to determine app state
   await Hive.openBox('settingsBox');
-
   final settingsBox = Hive.box('settingsBox');
-  final isFirstTime = settingsBox.get('is_first_time', defaultValue: true) as bool;
 
-  if (!isFirstTime) {
+  final isFirstTime =
+      settingsBox.get('is_first_time', defaultValue: true) as bool;
+  final String? savedPasscode = settingsBox.get('user_passcode');
+
+  String initialRoute;
+
+  // Check if the app is locked first
+  if (savedPasscode != null && savedPasscode.isNotEmpty) {
+    initialRoute = 'password_setup';
+  }
+  // Check if it's a new install
+  else if (isFirstTime) {
+    initialRoute = 'landing_page';
+  }
+  // Fallback (unlocked, existing user)
+  else {
     await HiveBoxManager.openUserDataBoxes();
+    initialRoute = 'homepage';
   }
 
   // Initialize Notifications
@@ -35,11 +49,13 @@ void main() async {
   await notifService.init();
   await notifService.requestPermissions();
 
-  runApp(const BytesAndBitesApp());
+  runApp(BytesAndBitesApp(nextRoute: initialRoute));
 }
 
 class BytesAndBitesApp extends StatelessWidget {
-  const BytesAndBitesApp({super.key});
+  final String nextRoute;
+
+  const BytesAndBitesApp({super.key, required this.nextRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +73,7 @@ class BytesAndBitesApp extends StatelessWidget {
             ),
             useMaterial3: true,
           ),
-          home: const SplashScreen(),
+          home: SplashScreen(targetRoute: nextRoute),
           routes: AppRouter.getRoutes(),
         );
       },

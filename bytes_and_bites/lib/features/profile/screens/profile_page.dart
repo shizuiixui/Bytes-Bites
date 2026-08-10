@@ -5,7 +5,6 @@ import 'package:bytes_and_bites/features/profile/screens/terms_and_conditions.da
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 import 'package:bytes_and_bites/features/home/widgets/homepage_helpers.dart';
 
@@ -20,9 +19,8 @@ class _ProfilePageState extends State<ProfilePage> {
   bool _isLoggingOut = false;
 
   Future<void> _handleLogout() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    await prefs.setBool('is_first_time', true);
+    final settingsBox = Hive.box('settingsBox');
+    await settingsBox.put('is_logged_in', false);
   }
 
   // Logout Confirmation Modal
@@ -59,7 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      "Are you sure you want to log out of your account?",
+                      "Are you sure you want to log out? Your local data will remain saved on this device.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14.sp,
@@ -102,19 +100,25 @@ class _ProfilePageState extends State<ProfilePage> {
                                       _isLoggingOut = true;
                                     });
 
+                                    await Future.delayed(
+                                      const Duration(milliseconds: 1500),
+                                    );
+
+                                    // Change the login flag
                                     await _handleLogout();
 
                                     if (!mounted) return;
 
+                                    //  Pop the confirmation dialog
                                     Navigator.pop(dialogContext);
+
                                     Navigator.of(
                                       context,
                                     ).pushNamedAndRemoveUntil(
-                                      'landing_page',
+                                      'password_setup',
                                       (route) => false,
                                     );
-
-                                    HiveBoxManager.closeUserDataBoxes();
+                                    await HiveBoxManager.closeUserDataBoxes();
                                   },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFE57373),
@@ -237,7 +241,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ChangeNamePage()),
+                    MaterialPageRoute(
+                      builder: (context) => const ChangeNamePage(),
+                    ),
                   );
                 },
               ),
@@ -247,7 +253,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ChangePasscodePage(),
+                      builder: (context) => const ChangePasscodePage(),
                     ),
                   );
                 },
@@ -263,7 +269,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TermsAndConditionsPage(),
+                      builder: (context) => const TermsAndConditionsPage(),
                     ),
                   );
                 },
@@ -274,7 +280,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => PrivacyPolicyPage(),
+                      builder: (context) => const PrivacyPolicyPage(),
                     ),
                   );
                 },

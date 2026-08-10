@@ -6,7 +6,7 @@ import 'package:bytes_and_bites/main.dart';
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const BytesAndBitesApp());
+    await tester.pumpWidget(const BytesAndBitesApp(nextRoute: 'landing_page'));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
