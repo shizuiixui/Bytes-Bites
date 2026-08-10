@@ -14,10 +14,12 @@ class NameSetupScreen extends StatefulWidget {
 
 class _NameSetupScreenState extends State<NameSetupScreen> {
   final nameController = TextEditingController();
+  final securityController = TextEditingController();
 
   @override
   void dispose() {
     nameController.dispose();
+    securityController.dispose();
     super.dispose();
   }
 
@@ -68,6 +70,31 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
                                 prefixIcon: Icons.person,
                               ),
                             ),
+
+                            SizedBox(height: 20.h),
+
+                            // Security Question Field
+                            Text(
+                              "Security Question",
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontFamily: 'NotoSans',
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            SizedBox(
+                              height: 55.h,
+                              child: TextFormField(
+                                controller: securityController,
+                                keyboardType: TextInputType.name,
+                                decoration: textInputField(
+                                  "What is your mother's name?",
+                                  prefixIcon: Icons.security,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -90,11 +117,18 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
                       text: "Continue",
                       onPressed: () {
                         String typedName = nameController.text.trim();
-
+                        String typedSecurity = securityController.text.trim();
                         if (typedName.isNotEmpty) {
                           final box = Hive.box('settingsBox');
 
                           box.put('userName', typedName);
+                          box.put('security_answer', typedSecurity);
+
+                          // ADD THIS PRINT STATEMENT:
+                          print("==== HIVE SAVE DEBUG ====");
+                          print("Saved Name: $typedName");
+                          print("Saved Answer: $typedSecurity");
+                          print("=========================");
 
                           print("Saved Name to Hive: $typedName");
 

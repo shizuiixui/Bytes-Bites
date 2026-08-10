@@ -110,6 +110,198 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
     });
   }
 
+  // Show Forgot Password Dialog
+  void _showForgotPasswordDialog() {
+    final box = Hive.box('settingsBox');
+    final String? savedAnswer = box.get('security_answer');
+
+    // Fallback: If they skipped the name setup entirely and don't have an answer saved
+    if (savedAnswer == null || savedAnswer.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'No security question was set during setup. App reset required.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    final TextEditingController answerController = TextEditingController();
+    bool hasError = false;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              backgroundColor: Colors.white,
+              child: Padding(
+                padding: EdgeInsets.all(24.w),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.lock_reset_rounded,
+                      size: 50.sp,
+                      color: const Color(0xFFB0DB9C),
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      "Reset Passcode",
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins',
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      "Answer your security question to reset your PIN.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontFamily: 'Inter',
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+
+                    // Input Field for the Answer
+                    SizedBox(
+                      height: 55.h,
+                      child: TextField(
+                        controller: answerController,
+                        decoration: InputDecoration(
+                          hintText: "What is your mother's name?",
+                          hintStyle: TextStyle(
+                            fontSize: 13.sp,
+                            color: Colors.grey.shade400,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.security,
+                            color: Colors.grey,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: Color(0xFFB0DB9C),
+                            ),
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Error Message
+                    if (hasError)
+                      Padding(
+                        padding: EdgeInsets.only(top: 8.h),
+                        child: Text(
+                          "Incorrect answer. Please try again.",
+                          style: TextStyle(
+                            color: const Color(0xFFE57373),
+                            fontSize: 12.sp,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ),
+
+                    SizedBox(height: 24.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(dialogContext),
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              side: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            child: const Text(
+                              "Cancel",
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              String typedAnswer = answerController.text
+                                  .trim()
+                                  .toLowerCase();
+
+                              String normalizedSavedAnswer = savedAnswer!
+                                  .trim()
+                                  .toLowerCase();
+
+                              if (typedAnswer == normalizedSavedAnswer) {
+                                Navigator.pop(dialogContext);
+
+                                setState(() {
+                                  _isSetupMode = true;
+                                  _savedPasscode = null;
+                                  _pin = "";
+                                });
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Success! Please enter a new 4-digit passcode.',
+                                    ),
+                                    backgroundColor: Color(0xFFB0DB9C),
+                                  ),
+                                );
+                              } else {
+                                setDialogState(() {
+                                  hasError = true;
+                                });
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFB0DB9C),
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: const Text(
+                              "Verify",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -198,6 +390,23 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
                 ),
               ),
             ),
+
+            if (!_isSetupMode && !_isLoading)
+              Padding(
+                padding: EdgeInsets.only(bottom: 30.h),
+                child: TextButton(
+                  onPressed: _showForgotPasswordDialog,
+                  child: Text(
+                    "Forgot Passcode?",
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFFB0DB9C),
+                    ),
+                  ),
+                ),
+              ),
 
             //  Only show Skip button if we are setting up a new pin
             if (_isSetupMode)
