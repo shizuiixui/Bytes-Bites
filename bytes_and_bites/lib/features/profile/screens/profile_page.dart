@@ -5,6 +5,7 @@ import 'package:bytes_and_bites/features/profile/screens/terms_and_conditions.da
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bytes_and_bites/features/home/widgets/homepage_helpers.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -15,117 +16,142 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  bool _isLoggingOut = false;
+
+  Future<void> _handleLogout() async {
+    final prefs = await SharedPreferences.getInstance();
+    final settingsBox = Hive.box('settingsBox');
+
+    await prefs.setBool('is_first_time', true);
+    await settingsBox.delete('userName');
+    await settingsBox.delete('user_passcode');
+  }
+
   // Logout Confirmation Modal
   void _showLogoutDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.r),
-          ),
-          backgroundColor: Colors.white,
-          child: Padding(
-            padding: EdgeInsets.all(24.w),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.logout_rounded,
-                  size: 50.sp,
-                  color: const Color(0xFFE57373),
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  "Log Out?",
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Poppins',
-                    color: Colors.black87,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  "Are you sure you want to log out of your account?",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontFamily: 'Inter',
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-                SizedBox(height: 24.h),
-                Row(
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              backgroundColor: Colors.white,
+              child: Padding(
+                padding: EdgeInsets.all(24.w),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Cancel Button
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          side: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        child: const Text(
-                          "Cancel",
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    Icon(
+                      Icons.logout_rounded,
+                      size: 50.sp,
+                      color: const Color(0xFFE57373),
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      "Log Out?",
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins',
+                        color: Colors.black87,
                       ),
                     ),
-                    SizedBox(width: 12.w),
-                    // Confirm Logout Button
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-
-                          ScaffoldMessenger.of(this.context).showSnackBar(
-                            SnackBar(
-                              content: const Text(
-                                "Logged out successfully.",
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              backgroundColor: Colors.black87,
-                              behavior: SnackBarBehavior.fixed,
+                    SizedBox(height: 8.h),
+                    Text(
+                      "Are you sure you want to log out of your account?",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontFamily: 'Inter',
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: _isLoggingOut
+                                ? null
+                                : () => Navigator.pop(dialogContext),
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.r),
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              side: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            child: const Text(
+                              "Cancel",
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE57373),
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          "Log out",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _isLoggingOut
+                                ? null
+                                : () async {
+                                    setDialogState(() {
+                                      _isLoggingOut = true;
+                                    });
+
+                                    await _handleLogout();
+
+                                    if (!mounted) return;
+
+                                    Navigator.pop(dialogContext);
+                                    Navigator.of(
+                                      context,
+                                    ).pushNamedAndRemoveUntil(
+                                      'landing_page',
+                                      (route) => false,
+                                    );
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFE57373),
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: _isLoggingOut
+                                ? SizedBox(
+                                    height: 18.h,
+                                    width: 18.h,
+                                    child: const CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : const Text(
+                                    "Log out",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
