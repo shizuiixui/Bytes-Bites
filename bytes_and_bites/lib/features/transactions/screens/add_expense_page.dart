@@ -90,7 +90,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
             style: TextStyle(fontFamily: 'Inter'),
           ),
           backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
+          behavior: SnackBarBehavior.fixed,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.r),
           ),
@@ -192,7 +192,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                                 ),
                               ),
                               backgroundColor: const Color(0xFFB0DB9C),
-                              behavior: SnackBarBehavior.floating,
+                              behavior: SnackBarBehavior.fixed,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.r),
                               ),

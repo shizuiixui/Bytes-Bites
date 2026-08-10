@@ -91,7 +91,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
             style: TextStyle(fontFamily: 'Inter'),
           ),
           backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
+          behavior: SnackBarBehavior.fixed,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.r),
           ),
@@ -196,7 +196,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                                 ),
                               ),
                               backgroundColor: const Color(0xFFB0DB9C),
-                              behavior: SnackBarBehavior.floating,
+                              behavior: SnackBarBehavior.fixed,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.r),
                               ),

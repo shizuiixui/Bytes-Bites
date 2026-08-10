@@ -20,7 +20,7 @@ class _ChangePasscodePageState extends State<ChangePasscodePage> {
         SnackBar(
           content: const Text("New passcodes do not match!", style: TextStyle(fontFamily: 'Inter')),
           backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
+          behavior: SnackBarBehavior.fixed,
         ),
       );
       return;
@@ -30,7 +30,7 @@ class _ChangePasscodePageState extends State<ChangePasscodePage> {
       SnackBar(
         content: const Text("Passcode updated successfully!", style: TextStyle(fontFamily: 'Inter')),
         backgroundColor: const Color(0xFFB0DB9C),
-        behavior: SnackBarBehavior.floating,
+        behavior: SnackBarBehavior.fixed,
       ),
     );
     Navigator.pop(context);

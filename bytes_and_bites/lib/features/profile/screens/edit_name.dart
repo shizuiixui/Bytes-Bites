@@ -33,7 +33,7 @@ class _ChangeNamePageState extends State<ChangeNamePage> {
           style: TextStyle(fontFamily: 'Inter'),
         ),
         backgroundColor: const Color(0xFFB0DB9C),
-        behavior: SnackBarBehavior.floating,
+        behavior: SnackBarBehavior.fixed,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.r),
         ),

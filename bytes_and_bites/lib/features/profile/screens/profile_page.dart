@@ -96,7 +96,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                               ),
                               backgroundColor: Colors.black87,
-                              behavior: SnackBarBehavior.floating,
+                              behavior: SnackBarBehavior.fixed,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.r),
                               ),
