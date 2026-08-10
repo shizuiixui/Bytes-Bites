@@ -21,6 +21,7 @@ class PasswordSetupHelpers extends StatelessWidget {
               fontWeight: FontWeight.w700,
               color: Colors.black,
             ),
+            textAlign: TextAlign.center,
           ),
           SizedBox(height: 10),
           Text(
@@ -31,6 +32,7 @@ class PasswordSetupHelpers extends StatelessWidget {
               fontWeight: FontWeight.w400,
               color: Colors.black87,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

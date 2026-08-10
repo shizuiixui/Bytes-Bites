@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 InputDecoration textInputField(
   String hintText, {
-
   IconData? prefixIcon,
   IconData? suffixIcon,
 }) {

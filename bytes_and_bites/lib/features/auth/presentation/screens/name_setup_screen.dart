@@ -51,7 +51,7 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
                     // Text Section
                     const NameSetupHelpers(),
 
-                    SizedBox(height: 10.h),
+                    SizedBox(height: 15.h),
 
                     // Input Field
                     Padding(
@@ -115,7 +115,7 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
                     ),
                   ),
 
-                  SizedBox(height: 5.h),
+                  SizedBox(height: 15.h),
 
                   // Skip Button
                   TextButton(

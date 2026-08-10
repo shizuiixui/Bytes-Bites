@@ -132,8 +132,6 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
                       ),
                     ),
 
-                    SizedBox(height: 20.h),
-
                     if (_isSetupMode)
                       const PasswordSetupHelpers()
                     else
@@ -180,7 +178,7 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
                         ),
                       ),
 
-                    SizedBox(height: _hasError ? 24.h : 40.h),
+                    SizedBox(height: _hasError ? 24.h : 30.h),
 
                     // Custom Numpad
                     if (_isLoading)
@@ -213,7 +211,7 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
                             _isLoading = true;
                           });
                           await Future.delayed(
-                            const Duration(milliseconds: 1500),
+                            const Duration(milliseconds: 1800),
                           );
                           final box = Hive.box('settingsBox');
                           await box.put('is_first_time', false);
