@@ -99,131 +99,165 @@ class _AddExpensePageState extends State<AddExpensePage> {
       return;
     }
 
+    bool isSaving = false;
+
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.r),
-          ),
-          backgroundColor: Colors.white,
-          child: Padding(
-            padding: EdgeInsets.all(24.w),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.help_outline_rounded,
-                  size: 50.sp,
-                  color: const Color(0xFFB0DB9C),
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  "Save Expense?",
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Poppins',
-                    color: Colors.black87,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  "Are you sure you want to add ₱${_amountController.text} for ${_descController.text}?",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontFamily: 'Inter',
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-                SizedBox(height: 24.h),
-                Row(
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              backgroundColor: Colors.white,
+              child: Padding(
+                padding: EdgeInsets.all(24.w),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Cancel Button
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          side: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        child: const Text(
-                          "Cancel",
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    Icon(
+                      Icons.help_outline_rounded,
+                      size: 50.sp,
+                      color: const Color(0xFFB0DB9C),
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      "Save Expense?",
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins',
+                        color: Colors.black87,
                       ),
                     ),
-                    SizedBox(width: 12.w),
-                    // Confirm Button
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Create the database object
-                          final newExpense = ExpenseModel(
-                            description: _descController.text,
-                            amount: double.parse(_amountController.text),
-                            categoryName: _selectedCategory!.name,
-                            date: _selectedDate,
-                          );
-
-                          // Grab the open database box
-                          final box = HiveBoxManager.expensesBox();
-
-                          // Save it
-                          box.add(newExpense);
-
-                          Navigator.pop(context);
-
-                          ScaffoldMessenger.of(this.context).showSnackBar(
-                            SnackBar(
-                              content: const Text(
-                                "Expense saved successfully!",
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              backgroundColor: const Color(0xFFB0DB9C),
-                              behavior: SnackBarBehavior.fixed,
+                    SizedBox(height: 8.h),
+                    Text(
+                      "Are you sure you want to add ₱${_amountController.text} for ${_descController.text}?",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontFamily: 'Inter',
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+                    Row(
+                      children: [
+                        // Cancel Button
+                        Expanded(
+                          child: OutlinedButton(
+                            // Disable the cancel button while loading
+                            onPressed: isSaving
+                                ? null
+                                : () => Navigator.pop(dialogContext),
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.r),
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              side: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            child: const Text(
+                              "Cancel",
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          );
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        // Confirm Button
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: isSaving
+                                ? null
+                                : () async {
+                                    // Trigger the spinner
+                                    setDialogState(() {
+                                      isSaving = true;
+                                    });
+                                    await Future.delayed(
+                                      const Duration(milliseconds: 1800),
+                                    );
 
-                          Navigator.pop(this.context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFB0DB9C),
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
+                                    final newExpense = ExpenseModel(
+                                      description: _descController.text,
+                                      amount: double.parse(
+                                        _amountController.text,
+                                      ),
+                                      categoryName: _selectedCategory!.name,
+                                      date: _selectedDate,
+                                    );
+
+                                    final box = HiveBoxManager.expensesBox();
+                                    box.add(newExpense);
+                                    if (context.mounted) {
+                                      Navigator.pop(dialogContext);
+
+                                      ScaffoldMessenger.of(
+                                        this.context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: const Text(
+                                            "Expense saved successfully!",
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          backgroundColor: const Color(
+                                            0xFFB0DB9C,
+                                          ),
+                                          behavior: SnackBarBehavior.fixed,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              10.r,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+
+                                      Navigator.pop(this.context);
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFB0DB9C),
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: isSaving
+                                ? SizedBox(
+                                    height: 20.h,
+                                    width: 20.h,
+                                    child: const CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
+                                  )
+                                : const Text(
+                                    "Confirm",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ),
-                          elevation: 0,
                         ),
-                        child: const Text(
-                          "Confirm",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
