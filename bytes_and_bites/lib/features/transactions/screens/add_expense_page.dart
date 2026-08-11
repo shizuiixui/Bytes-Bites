@@ -6,7 +6,6 @@ import 'package:bytes_and_bites/core/widgets/primary_button.dart';
 import 'package:bytes_and_bites/core/widgets/categories.dart';
 import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 import 'package:bytes_and_bites/features/transactions/widgets/add_expense_helpers.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:bytes_and_bites/models/expense_model.dart';
 
 class AddExpensePage extends StatefulWidget {

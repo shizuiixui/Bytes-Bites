@@ -246,7 +246,7 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
                                   .trim()
                                   .toLowerCase();
 
-                              String normalizedSavedAnswer = savedAnswer!
+                              String normalizedSavedAnswer = savedAnswer
                                   .trim()
                                   .toLowerCase();
 
