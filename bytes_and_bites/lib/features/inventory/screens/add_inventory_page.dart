@@ -91,6 +91,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
     );
   }
 
+  // Confirmation Dialog
   void _showConfirmationDialog() {
     if (_itemNameController.text.isEmpty || _selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -109,125 +110,164 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
       return;
     }
 
+    bool isSaving = false;
+
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.r),
-          ),
-          backgroundColor: Colors.white,
-          child: Padding(
-            padding: EdgeInsets.all(24.w),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.inventory_2_rounded,
-                  size: 50.sp,
-                  color: const Color(0xFFB0DB9C),
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  "Save Item?",
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Poppins',
-                    color: Colors.black87,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  "Are you sure you want to add $_quantity ${_itemNameController.text} to your inventory?",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontFamily: 'Inter',
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-                SizedBox(height: 24.h),
-                Row(
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              backgroundColor: Colors.white,
+              child: Padding(
+                padding: EdgeInsets.all(24.w),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          side: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        child: const Text(
-                          "Cancel",
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    Icon(
+                      Icons.inventory_2_rounded,
+                      size: 50.sp,
+                      color: const Color(0xFFB0DB9C),
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      "Save Item?",
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins',
+                        color: Colors.black87,
                       ),
                     ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Create the Hive object
-                          final newItem = InventoryModel(
-                            name: _itemNameController.text,
-                            quantity: _quantity,
-                            categoryName: _selectedCategory!.name,
-                          );
-
-                          // Save to Hive
-                          HiveBoxManager.inventoryBox().add(newItem);
-
-                          Navigator.pop(context);
-
-                          ScaffoldMessenger.of(this.context).showSnackBar(
-                            SnackBar(
-                              content: const Text(
-                                "Item saved successfully!",
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              backgroundColor: const Color(0xFFB0DB9C),
-                              behavior: SnackBarBehavior.fixed,
+                    SizedBox(height: 8.h),
+                    Text(
+                      "Are you sure you want to add $_quantity ${_itemNameController.text} to your inventory?",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontFamily: 'Inter',
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: isSaving
+                                ? null
+                                : () => Navigator.pop(context),
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.r),
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              side: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            child: const Text(
+                              "Cancel",
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          );
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        // Confirm Button
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: isSaving
+                                ? null
+                                : () async {
+                                    setDialogState(() {
+                                      isSaving = true;
+                                    });
 
-                          Navigator.pop(this.context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFB0DB9C),
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
+                                    await Future.delayed(
+                                      const Duration(milliseconds: 1800),
+                                    );
+
+                                    // Create the Hive object
+                                    final newItem = InventoryModel(
+                                      name: _itemNameController.text,
+                                      quantity: _quantity,
+                                      categoryName: _selectedCategory!.name,
+                                    );
+
+                                    // Save to Hive
+                                    HiveBoxManager.inventoryBox().add(newItem);
+
+                                    if (context.mounted) {
+                                      Navigator.pop(context); // Close dialog
+
+                                      ScaffoldMessenger.of(
+                                        this.context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: const Text(
+                                            "Item saved successfully!",
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          backgroundColor: const Color(
+                                            0xFFB0DB9C,
+                                          ),
+                                          behavior: SnackBarBehavior.fixed,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              10.r,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+
+                                      Navigator.pop(
+                                        this.context,
+                                      ); // Return to previous page
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFB0DB9C),
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: isSaving
+                                ? SizedBox(
+                                    height: 20.h,
+                                    width: 20.h,
+                                    child: const CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
+                                  )
+                                : const Text(
+                                    "Confirm",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ),
-                          elevation: 0,
                         ),
-                        child: const Text(
-                          "Confirm",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
