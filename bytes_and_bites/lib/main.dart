@@ -9,6 +9,8 @@ import 'package:bytes_and_bites/models/expense_model.dart';
 import 'package:bytes_and_bites/core/services/notification_service.dart';
 import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -64,19 +66,81 @@ class BytesAndBitesApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        return MaterialApp(
-          title: 'Bytes & Bites',
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFFB0DB9C),
+        return SessionManager(
+          child: MaterialApp(
+            navigatorKey: navigatorKey,
+            title: 'Bytes & Bites',
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFFB0DB9C),
+              ),
+              useMaterial3: true,
             ),
-            useMaterial3: true,
+            home: SplashScreen(targetRoute: nextRoute),
+            routes: AppRouter.getRoutes(),
           ),
-          home: SplashScreen(targetRoute: nextRoute),
-          routes: AppRouter.getRoutes(),
         );
       },
     );
+  }
+}
+
+// Session Manager to handle app lifecycle events
+class SessionManager extends StatefulWidget {
+  final Widget child;
+  const SessionManager({super.key, required this.child});
+
+  @override
+  State<SessionManager> createState() => _SessionManagerState();
+}
+
+class _SessionManagerState extends State<SessionManager>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this); // Start listening
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // Stop listening
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    final box = Hive.box('settingsBox');
+
+    final savedPasscode = box.get('user_passcode');
+    if (savedPasscode == null || savedPasscode.isEmpty) return;
+
+    if (state == AppLifecycleState.paused) {
+      box.put('last_active_time', DateTime.now().millisecondsSinceEpoch);
+    } else if (state == AppLifecycleState.resumed) {
+      final lastActiveTime = box.get('last_active_time');
+
+      if (lastActiveTime != null) {
+        final lastActive = DateTime.fromMillisecondsSinceEpoch(lastActiveTime);
+        final difference = DateTime.now().difference(lastActive);
+
+        if (difference.inMinutes >= 5) {
+          box.put('is_logged_in', false);
+          box.delete('last_active_time'); // Reset the timer
+
+          navigatorKey.currentState?.pushNamedAndRemoveUntil(
+            'password_setup',
+            (route) => false,
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
 }
