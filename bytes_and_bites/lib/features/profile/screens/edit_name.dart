@@ -1,4 +1,3 @@
-import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 import 'package:bytes_and_bites/core/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -15,6 +14,8 @@ class _ChangeNamePageState extends State<ChangeNamePage> {
   late final TextEditingController _nameController;
   late final Box _settingsBox;
 
+  bool _isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -27,13 +28,23 @@ class _ChangeNamePageState extends State<ChangeNamePage> {
     final newName = _nameController.text.trim();
     if (newName.isEmpty) return;
 
-    final oldName = _settingsBox.get('userName', defaultValue: 'User') as String;
-
-    await HiveBoxManager.closeUserDataBoxes(userName: oldName);
-    _settingsBox.put('userName', newName);
-    await HiveBoxManager.openUserDataBoxes(userName: newName);
+    final oldName =
+        _settingsBox.get('userName', defaultValue: 'User') as String;
+    if (newName == oldName) {
+      Navigator.pop(context);
+      return;
+    }
+    setState(() {
+      _isLoading = true;
+    });
+    await Future.delayed(const Duration(milliseconds: 1500));
+    await _settingsBox.put('userName', newName);
 
     if (!mounted) return;
+
+    setState(() {
+      _isLoading = false;
+    });
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -76,7 +87,7 @@ class _ChangeNamePageState extends State<ChangeNamePage> {
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black, size: 24.sp),
-          onPressed: () => Navigator.pop(context),
+          onPressed: _isLoading ? null : () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(
@@ -96,6 +107,8 @@ class _ChangeNamePageState extends State<ChangeNamePage> {
               SizedBox(height: 24.h),
               TextFormField(
                 controller: _nameController,
+                // Disable typing while loading
+                enabled: !_isLoading,
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontFamily: 'Inter',
@@ -126,7 +139,11 @@ class _ChangeNamePageState extends State<ChangeNamePage> {
                 ),
               ),
               const Spacer(),
-              PrimaryButton(text: "Save Changes", onPressed: () => _saveName()),
+              PrimaryButton(
+                text: "Save Changes",
+                isLoading: _isLoading,
+                onPressed: _isLoading ? null : _saveName,
+              ),
               SizedBox(height: 20.h),
             ],
           ),
