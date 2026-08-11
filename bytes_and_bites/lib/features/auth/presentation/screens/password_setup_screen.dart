@@ -385,7 +385,6 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
                       CustomNumpad(
                         onNumberPressed: _onNumberPressed,
                         onDeletePressed: _onDeletePressed,
-                        onBiometricsPressed: () => print("Trigger Biometrics"),
                       ),
                   ],
                 ),

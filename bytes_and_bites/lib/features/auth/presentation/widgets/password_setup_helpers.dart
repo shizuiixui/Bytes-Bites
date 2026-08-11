@@ -73,13 +73,11 @@ class PasscodeIndicator extends StatelessWidget {
 class CustomNumpad extends StatelessWidget {
   final Function(String) onNumberPressed;
   final VoidCallback onDeletePressed;
-  final VoidCallback onBiometricsPressed;
 
   const CustomNumpad({
     super.key,
     required this.onNumberPressed,
     required this.onDeletePressed,
-    required this.onBiometricsPressed,
   });
 
   @override
@@ -97,10 +95,7 @@ class CustomNumpad extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildIconButton(
-                icon: Icons.fingerprint,
-                onPressed: onBiometricsPressed,
-              ),
+              SizedBox(width: 70.w, height: 70.h),
               _buildNumberButton('0'),
               _buildIconButton(
                 icon: Icons.backspace,
