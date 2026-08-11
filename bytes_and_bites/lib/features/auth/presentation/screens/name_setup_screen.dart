@@ -170,22 +170,6 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
                   ),
 
                   SizedBox(height: 15.h),
-
-                  // Skip Button
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, 'password_setup');
-                    },
-                    child: Text(
-                      'Skip for now',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFFB0DB9C),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),

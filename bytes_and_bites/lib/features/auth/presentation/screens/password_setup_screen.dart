@@ -100,7 +100,7 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
     }
   }
 
-  // Handle delete button press 
+  // Handle delete button press
   void _onDeletePressed() {
     if (_isLoading) return;
 
@@ -117,7 +117,6 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
     final box = Hive.box('settingsBox');
     final String? savedAnswer = box.get('security_answer');
 
-    // Fallback: If they skipped the name setup entirely and don't have an answer saved
     if (savedAnswer == null || savedAnswer.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -405,41 +404,6 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFFB0DB9C),
-                    ),
-                  ),
-                ),
-              ),
-
-            //  Only show Skip button if we are setting up a new pin
-            if (_isSetupMode)
-              Padding(
-                padding: EdgeInsets.only(bottom: 20.h),
-                child: TextButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () async {
-                          setState(() {
-                            _isLoading = true;
-                          });
-                          await Future.delayed(
-                            const Duration(milliseconds: 1800),
-                          );
-                          final box = Hive.box('settingsBox');
-                          await box.put('is_first_time', false);
-                          await box.put('is_logged_in', true);
-
-                          await HiveBoxManager.openUserDataBoxes();
-                          if (context.mounted) {
-                            Navigator.pushReplacementNamed(context, 'homepage');
-                          }
-                        },
-                  child: Text(
-                    'Skip for now',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w700,
-                      color: _isLoading ? Colors.grey : const Color(0xFFB0DB9C),
                     ),
                   ),
                 ),
