@@ -37,11 +37,12 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
     });
   }
 
+  // Handle number button press
   Future<void> _onNumberPressed(String number) async {
     if (_isLoading) return;
 
     setState(() {
-      _hasError = false; // Clear error state on typing
+      _hasError = false; // Clear error state
       if (_pin.length < 4) {
         _pin += number;
       }
@@ -51,7 +52,7 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
       setState(() {
         _isLoading = true;
       });
-
+      await Future.delayed(const Duration(milliseconds: 1500));
       final box = Hive.box('settingsBox');
 
       try {
@@ -99,6 +100,7 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
     }
   }
 
+  // Handle delete button press 
   void _onDeletePressed() {
     if (_isLoading) return;
 
