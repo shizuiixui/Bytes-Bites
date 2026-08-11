@@ -53,7 +53,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
       // Floating Action Button
       floatingActionButton: const ExpandableFab(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

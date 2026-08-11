@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 class ExpandableFab extends StatefulWidget {
   const ExpandableFab({super.key});
@@ -48,132 +47,119 @@ class _ExpandableFabState extends State<ExpandableFab>
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 45),
-      child: SizedBox(
-        width: 200,
-        height: 200,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          clipBehavior: Clip.none,
-          children: [
-            // Transactions
-            _buildExpandingAction(
-              angle: math.pi / 4 * 3,
-              distance: 80,
-              icon: Image.asset(
-                'assets/images/bottom_nav_bar/fab_transactions.png',
-                width: 20,
-                height: 20,
-                color: const Color(0xFFB0DB9C),
-              ),
-              onPressed: () {
-                Navigator.pushNamed(context, 'add_expense');
-              },
+    return SizedBox(
+      width: 250,
+      height: 250,
+      child: Stack(
+        alignment: Alignment.bottomRight,
+        clipBehavior: Clip.none,
+        children: [
+          // Inventory
+          _buildExpandingAction(
+            label: "Inventory",
+            bottomOffset: 180, // Highest up
+            icon: Image.asset(
+              'assets/images/bottom_nav_bar/fab_inventory.png',
+              width: 20,
+              height: 20,
+              color: const Color(0xFFB0DB9C),
             ),
+            onPressed: () => Navigator.pushNamed(context, 'add_inventory'),
+          ),
 
-            // Subscriptions
-            _buildExpandingAction(
-              angle: math.pi / 2,
-              distance: 80,
-              icon: const Icon(Icons.event_repeat, color: Color(0xFFB0DB9C)),
-              onPressed: () {
-                Navigator.pushNamed(context, 'add_subscription');
-              },
+          // Subscriptions
+          _buildExpandingAction(
+            label: "Subscriptions",
+            bottomOffset: 120,
+            icon: const Icon(Icons.event_repeat, color: Color(0xFFB0DB9C)),
+            onPressed: () => Navigator.pushNamed(context, 'add_subscription'),
+          ),
+
+          // Expenses
+          _buildExpandingAction(
+            label: "Expenses",
+            bottomOffset: 60,
+            icon: Image.asset(
+              'assets/images/bottom_nav_bar/fab_transactions.png',
+              width: 20,
+              height: 20,
+              color: const Color(0xFFB0DB9C),
             ),
+            onPressed: () => Navigator.pushNamed(context, 'add_expense'),
+          ),
 
-            // Inventory
-            _buildExpandingAction(
-              angle: math.pi / 4,
-              distance: 80,
-              icon: Image.asset(
-                'assets/images/bottom_nav_bar/fab_inventory.png',
-                width: 20,
-                height: 20,
-                color: const Color(0xFFB0DB9C),
-              ),
-              onPressed: () {
-                Navigator.pushNamed(context, 'add_inventory');
-              },
+          // Main Bottom FAB
+          FloatingActionButton(
+            backgroundColor: const Color(0xFFB0DB9C),
+            shape: const CircleBorder(
+              side: BorderSide(color: Colors.white, width: 1.5),
             ),
-
-            // Main Bottom FAB
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: _isOpen
-                      ? [
-                          BoxShadow(
-                            color: const Color(0xFFB0DB9C).withOpacity(0.8),
-                            blurRadius: 15,
-                            spreadRadius: 0.3,
-                            offset: const Offset(0, -3),
-                          ),
-                        ]
-                      : [],
-                ),
-                child: FloatingActionButton(
-                  backgroundColor: const Color(0xFFB0DB9C),
-                  shape: const CircleBorder(
-                    side: BorderSide(color: Colors.white, width: 1.5),
-                  ),
-                  elevation: 4,
-                  onPressed: _toggleOpen,
-                  child: AnimatedRotation(
-                    turns: _isOpen ? 0.125 : 0.0,
-                    duration: const Duration(milliseconds: 250),
-                    child: Image.asset(
-                      'assets/images/bottom_nav_bar/fab.png',
-                      width: 24,
-                      height: 24,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+            elevation: 4,
+            onPressed: _toggleOpen,
+            child: AnimatedRotation(
+              turns: _isOpen ? 0.125 : 0.0,
+              duration: const Duration(milliseconds: 250),
+              child: Image.asset(
+                'assets/images/bottom_nav_bar/fab.png',
+                width: 24,
+                height: 24,
+                color: Colors.white,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildExpandingAction({
-    required double angle,
-    required double distance,
+    required String label,
+    required double bottomOffset,
     required Widget icon,
     required VoidCallback onPressed,
   }) {
     return AnimatedBuilder(
       animation: _expandAnimation,
       builder: (context, child) {
-        final offset = Offset(
-          distance * math.cos(angle),
-          -distance * math.sin(angle),
-        );
         return Positioned(
-          bottom: 0,
+          right: 4,
+          bottom: 4,
           child: Transform.translate(
-            offset: offset * _expandAnimation.value,
-            child: Transform.scale(scale: _expandAnimation.value, child: child),
+            offset: Offset(0, -bottomOffset * _expandAnimation.value),
+            child: Transform.scale(
+              scale: _expandAnimation.value,
+              child: Opacity(opacity: _expandAnimation.value.clamp(0.0, 1.0),
+               child: child),
+            ),
           ),
         );
       },
-      child: FloatingActionButton.small(
-        heroTag: null,
-        backgroundColor: Colors.white,
-        onPressed: () {
-          _controller.reverse();
-          setState(() {
-            _isOpen = false;
-          });
-
-          onPressed();
-        },
-        child: icon,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Text Label
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Mini FAB
+          FloatingActionButton.small(
+            heroTag: null,
+            backgroundColor: Colors.white,
+            onPressed: () {
+              _controller.reverse();
+              setState(() => _isOpen = false);
+              onPressed();
+            },
+            child: icon,
+          ),
+        ],
       ),
     );
   }
