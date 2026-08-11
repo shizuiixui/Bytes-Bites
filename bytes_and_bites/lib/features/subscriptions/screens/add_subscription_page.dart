@@ -80,6 +80,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
     );
   }
 
+  // Confirmation Dialog
   void _showConfirmationDialog() {
     if (_serviceController.text.isEmpty ||
         _amountController.text.isEmpty ||
@@ -99,138 +100,179 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
       );
       return;
     }
+    bool isSaving = false;
 
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.r),
-          ),
-          backgroundColor: Colors.white,
-          child: Padding(
-            padding: EdgeInsets.all(24.w),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.subscriptions_rounded,
-                  size: 50.sp,
-                  color: const Color(0xFFB0DB9C),
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  "Save Subscription?",
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Poppins',
-                    color: Colors.black87,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  "Are you sure you want to add ₱${_amountController.text} for ${_serviceController.text}?",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontFamily: 'Inter',
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-                SizedBox(height: 24.h),
-                Row(
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              backgroundColor: Colors.white,
+              child: Padding(
+                padding: EdgeInsets.all(24.w),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Cancel Button
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          side: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        child: const Text(
-                          "Cancel",
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    Icon(
+                      Icons.subscriptions_rounded,
+                      size: 50.sp,
+                      color: const Color(0xFFB0DB9C),
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      "Save Subscription?",
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins',
+                        color: Colors.black87,
                       ),
                     ),
-                    SizedBox(width: 12.w),
-                    // Confirm Button
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          //  Create the database object
-                          final newSubscription = SubscriptionModel(
-                            name: _serviceController.text.trim(),
-                            amount:
-                                double.tryParse(_amountController.text) ?? 0.0,
-                            nextBillingDate: _selectedDate,
-                          );
-
-                          // Save it to the Hive box
-                          HiveBoxManager.subscriptionsBox().add(newSubscription);
-
-                          // Schedule Notification
-                          await NotificationService()
-                              .scheduleSubscriptionAlerts(newSubscription);
-
-                          Navigator.pop(context);
-
-                          ScaffoldMessenger.of(this.context).showSnackBar(
-                            SnackBar(
-                              content: const Text(
-                                "Subscription saved successfully!",
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              backgroundColor: const Color(0xFFB0DB9C),
-                              behavior: SnackBarBehavior.fixed,
+                    SizedBox(height: 8.h),
+                    Text(
+                      "Are you sure you want to add ₱${_amountController.text} for ${_serviceController.text}?",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontFamily: 'Inter',
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+                    Row(
+                      children: [
+                        // Cancel Button
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: isSaving
+                                ? null
+                                : () => Navigator.pop(dialogContext),
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.r),
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              side: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            child: const Text(
+                              "Cancel",
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          );
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        // Confirm Button
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: isSaving
+                                ? null
+                                : () async {
+                                    setDialogState(() {
+                                      isSaving = true;
+                                    });
+                                    await Future.delayed(
+                                      const Duration(milliseconds: 1800),
+                                    );
+                                    //  Create the database object
+                                    final newSubscription = SubscriptionModel(
+                                      name: _serviceController.text.trim(),
+                                      amount:
+                                          double.tryParse(
+                                            _amountController.text,
+                                          ) ??
+                                          0.0,
+                                      nextBillingDate: _selectedDate,
+                                    );
 
-                          Navigator.pop(this.context); // Return to home page
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFB0DB9C),
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
+                                    // Save it to the Hive box
+                                    HiveBoxManager.subscriptionsBox().add(
+                                      newSubscription,
+                                    );
+
+                                    // Schedule Notification
+                                    await NotificationService()
+                                        .scheduleSubscriptionAlerts(
+                                          newSubscription,
+                                        );
+
+                                    Navigator.pop(context);
+
+                                    ScaffoldMessenger.of(
+                                      this.context,
+                                    ).showSnackBar(
+                                      SnackBar(
+                                        content: const Text(
+                                          "Subscription saved successfully!",
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        backgroundColor: const Color(
+                                          0xFFB0DB9C,
+                                        ),
+                                        behavior: SnackBarBehavior.fixed,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10.r,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+
+                                    Navigator.pop(
+                                      this.context,
+                                    ); // Return to home page
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFB0DB9C),
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: isSaving
+                                ? SizedBox(
+                                    height: 20.h,
+                                    width: 20.h,
+                                    child: const CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
+                                  )
+                                : const Text(
+                                    "Confirm",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ),
-                          elevation: 0,
                         ),
-                        child: const Text(
-                          "Confirm",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
   }
 
+  // Pick Date Function
   Future<void> _pickDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
