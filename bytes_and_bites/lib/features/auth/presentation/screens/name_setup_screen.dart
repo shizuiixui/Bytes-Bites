@@ -16,6 +16,8 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
   final nameController = TextEditingController();
   final securityController = TextEditingController();
 
+  bool _isLoading = false;
+
   @override
   void dispose() {
     nameController.dispose();
@@ -115,37 +117,55 @@ class _NameSetupScreenState extends State<NameSetupScreen> {
                     height: 50.h,
                     child: PrimaryButton(
                       text: "Continue",
-                      onPressed: () {
-                        String typedName = nameController.text.trim();
-                        String typedSecurity = securityController.text.trim();
-                        if (typedName.isNotEmpty) {
-                          final box = Hive.box('settingsBox');
+                      isLoading: _isLoading,
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                              setState(() {
+                                _isLoading = true;
+                              });
 
-                          box.put('userName', typedName);
-                          box.put('security_answer', typedSecurity);
+                              await Future.delayed(
+                                const Duration(milliseconds: 1800),
+                              );
 
-                          // ADD THIS PRINT STATEMENT:
-                          print("==== HIVE SAVE DEBUG ====");
-                          print("Saved Name: $typedName");
-                          print("Saved Answer: $typedSecurity");
-                          print("=========================");
+                              String typedName = nameController.text.trim();
+                              String typedSecurity = securityController.text
+                                  .trim()
+                                  .toLowerCase();
 
-                          print("Saved Name to Hive: $typedName");
+                              if (typedName.isNotEmpty &&
+                                  typedSecurity.isNotEmpty) {
+                                final box = Hive.box('settingsBox');
 
-                          if (context.mounted) {
-                            Navigator.pushReplacementNamed(
-                              context,
-                              'password_setup',
-                            );
-                          }
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please enter a name first!'),
-                            ),
-                          );
-                        }
-                      },
+                                box.put('userName', typedName);
+                                box.put('security_answer', typedSecurity);
+
+                                // Debugging prints
+                                print("Saved Name: $typedName");
+                                print("Saved Answer: $typedSecurity");
+                                print("Saved Name to Hive: $typedName");
+
+                                if (context.mounted) {
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    'password_setup',
+                                  );
+                                }
+                              } else {
+                                setState(() {
+                                  _isLoading = false;
+                                });
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Please fill out both fields!',
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
                     ),
                   ),
 
