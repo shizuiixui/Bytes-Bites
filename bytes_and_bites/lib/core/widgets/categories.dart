@@ -36,6 +36,30 @@ final List<ExpenseCategory> expenseCategories = [
     name: 'Health & Fitness', 
     icon: Icons.fitness_center_rounded
   ),
+  ExpenseCategory(
+    name: 'Education', 
+    icon: Icons.school_rounded
+  ),
+  ExpenseCategory(
+    name: 'Personal Care', 
+    icon: Icons.spa_rounded
+  ),
+  ExpenseCategory(
+    name: 'Shopping', 
+    icon: Icons.shopping_bag_rounded
+  ),
+  ExpenseCategory(
+    name: 'Travel', 
+    icon: Icons.flight_rounded
+  ),
+  ExpenseCategory(
+    name: 'Groceries', 
+    icon: Icons.local_grocery_store_rounded
+  ),
+  ExpenseCategory(
+    name: 'Other', 
+    icon: Icons.category_rounded
+  ),
 ];
 
 // Subscription Category
@@ -70,6 +94,14 @@ final List<SubscriptionCategory> subscriptionCategories = [
     name: 'Health & Fitness',
     icon: Icons.fitness_center_rounded,
   ),
+  SubscriptionCategory(
+    name: 'Education & Learning',
+    icon: Icons.school_rounded,
+  ),
+  SubscriptionCategory(
+    name: 'Other',
+    icon: Icons.category_rounded,
+  ),
 ];
 
 // Inventory Category
@@ -103,5 +135,17 @@ final List<InventoryCategory> inventoryCategories = [
   InventoryCategory(
     name: 'Cleaning Supplies',
     icon: Icons.cleaning_services_rounded,
+  ),
+  InventoryCategory(
+    name: 'Pet Supplies',
+    icon: Icons.pets_rounded,
+  ),
+  InventoryCategory(
+    name: 'Stationery & School Supplies',
+    icon: Icons.edit_rounded,
+  ),
+  InventoryCategory(
+    name: 'Other',
+    icon: Icons.category_rounded,
   ),
 ];

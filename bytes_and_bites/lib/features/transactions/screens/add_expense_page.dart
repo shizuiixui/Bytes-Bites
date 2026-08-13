@@ -44,6 +44,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
+      isScrollControlled:
+          true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
@@ -63,30 +65,45 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   ),
                 ),
                 SizedBox(height: 10.h),
-                ...expenseCategories.map(
-                  (category) => ListTile(
-                    leading: Container(
-                      padding: EdgeInsets.all(8.w),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFB0DB9C).withOpacity(0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        category.icon,
-                        color: const Color(0xFF5A8C47),
-                        size: 20.sp,
-                      ),
+                // List of categories
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: expenseCategories
+                          .map(
+                            (category) => ListTile(
+                              leading: Container(
+                                padding: EdgeInsets.all(8.w),
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                    0xFFB0DB9C,
+                                  ).withOpacity(0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  category.icon,
+                                  color: const Color(0xFF5A8C47),
+                                  size: 20.sp,
+                                ),
+                              ),
+                              title: Text(
+                                category.name,
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                              onTap: () {
+                                setState(() {
+                                  _selectedCategory = category;
+                                });
+                                Navigator.pop(context);
+                              },
+                            ),
+                          )
+                          .toList(),
                     ),
-                    title: Text(
-                      category.name,
-                      style: TextStyle(fontSize: 14.sp, fontFamily: 'Inter'),
-                    ),
-                    onTap: () {
-                      setState(() {
-                        _selectedCategory = category;
-                      });
-                      Navigator.pop(context);
-                    },
                   ),
                 ),
               ],
