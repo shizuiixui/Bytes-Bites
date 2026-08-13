@@ -237,7 +237,7 @@ class _ProfilePageState extends State<ProfilePage> {
               // Account Section
               _buildSectionTitle("Account"),
               _buildOptionButton(
-                "Edit your name",
+                "Edit Your Name",
                 onTap: () {
                   Navigator.push(
                     context,
@@ -248,7 +248,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 },
               ),
               _buildOptionButton(
-                "Change your passcode",
+                "Change Your Passcode",
                 onTap: () {
                   Navigator.push(
                     context,
