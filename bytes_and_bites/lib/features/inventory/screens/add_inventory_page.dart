@@ -110,6 +110,32 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
       return;
     }
 
+    // Duplicate Check Logic
+    final String newItemName = _itemNameController.text.trim();
+    final box = HiveBoxManager.inventoryBox();
+
+    // Checks the whole box
+    bool itemExists = box.values.any((item) => 
+      item.name.toLowerCase() == newItemName.toLowerCase()
+    );
+
+    if (itemExists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            "This item already exists in your inventory!",
+            style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.fixed,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.r),
+          ),
+        ),
+      );
+      return;
+    }
+
     bool isSaving = false;
 
     showDialog(
