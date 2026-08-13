@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:bytes_and_bites/models/inventory_model.dart';
+// NEW: Added this import to check the database for duplicates!
+import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 
 class InventoryCard extends StatelessWidget {
   final InventoryModel item;
@@ -128,9 +130,54 @@ class InventoryCard extends StatelessWidget {
                 backgroundColor: const Color(0xFFB0DB9C),
               ),
               onPressed: () {
-                item.name = nameController.text.trim();
-                item.save(); // Save changes to Hive
-                Navigator.pop(dialogContext);
+                final newName = nameController.text.trim();
+                
+                if (newName.isEmpty) {
+                  return; 
+                }
+
+                // Duplicate Check Logic
+                final box = HiveBoxManager.inventoryBox();
+                bool itemExists = box.values.any((existingItem) {
+                  if (existingItem.key == item.key) return false; 
+                  return existingItem.name.toLowerCase() == newName.toLowerCase();
+                });
+
+                if (itemExists) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text(
+                        "This item already exists in your inventory!",
+                        style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+                      ),
+                      backgroundColor: Colors.redAccent,
+                      behavior: SnackBarBehavior.fixed,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                    ),
+                  );
+                  return; 
+                }
+                if (item.name != newName) {
+                  item.name = newName;
+                  item.save(); // Save changes to Hive
+                  
+                  Navigator.pop(dialogContext);
+                  
+                  // SnackBar
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        "Item name updated to $newName!",
+                        style: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+                      ),
+                      backgroundColor: const Color(0xFFB0DB9C),
+                      behavior: SnackBarBehavior.fixed,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                    ),
+                  );
+                } else {
+                  Navigator.pop(dialogContext);
+                }
               },
               child: const Text(
                 "Save",
