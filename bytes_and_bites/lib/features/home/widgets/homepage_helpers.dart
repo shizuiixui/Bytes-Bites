@@ -83,24 +83,87 @@ class HomeHeader extends StatelessWidget {
           ),
 
           // Notification Icon
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const NotificationPage(),
+          ListenableBuilder(
+            listenable: Listenable.merge([
+              HiveBoxManager.inventoryBox().listenable(),
+              HiveBoxManager.subscriptionsBox().listenable(),
+              Hive.box(
+                HiveBoxManager.settingsBoxName,
+              ).listenable(keys: ['readNotifications']),
+            ]),
+            builder: (context, child) {
+              bool hasUnread = false;
+              final settingsBox = Hive.box(HiveBoxManager.settingsBoxName);
+              final readNotifs =
+                  settingsBox
+                      .get('readNotifications', defaultValue: <String>[])
+                      ?.cast<String>() ??
+                  [];
+
+              // Check Inventory for unread alerts
+              for (var item in HiveBoxManager.inventoryBox().values) {
+                if (item.quantity <= item.lowStockThreshold) {
+                  String notifId = 'inv_${item.key}_lowstock';
+                  if (!readNotifs.contains(notifId)) {
+                    hasUnread = true;
+                    break;
+                  }
+                }
+              }
+
+              if (!hasUnread) {
+                for (var sub in HiveBoxManager.subscriptionsBox().values) {
+                  if (sub.daysUntilDue >= 0 && sub.daysUntilDue <= 3) {
+                    String notifId =
+                        'sub_${sub.key}_${sub.nextBillingDate.millisecondsSinceEpoch}';
+                    if (!readNotifs.contains(notifId)) {
+                      hasUnread = true;
+                      break;
+                    }
+                  }
+                }
+              }
+
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationPage(),
+                    ),
+                  );
+                },
+                child: Stack(
+                  children: [
+                    Container(
+                      width: 50.w,
+                      height: 50.w,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                      child: Icon(Icons.notifications_outlined, size: 25.sp),
+                    ),
+
+                    // Red Dot Indicator
+                    if (hasUnread)
+                      Positioned(
+                        top: 12.h,
+                        right: 12.w,
+                        child: Container(
+                          width: 10.w,
+                          height: 10.w,
+                          decoration: BoxDecoration(
+                            color: Colors.redAccent,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               );
             },
-            child: Container(
-              width: 50.w,
-              height: 50.w,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-              ),
-              child: Icon(Icons.notifications_outlined, size: 25.sp),
-            ),
           ),
         ],
       ),
@@ -231,7 +294,10 @@ class _HomeCarouselState extends State<HomeCarousel> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel", style: TextStyle(color: Colors.grey, fontFamily: 'Inter')),
+            child: const Text(
+              "Cancel",
+              style: TextStyle(color: Colors.grey, fontFamily: 'Inter'),
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -407,7 +473,8 @@ class _HomeCarouselState extends State<HomeCarousel> {
                                           borderRadius: BorderRadius.circular(
                                             12.r,
                                           ),
-                                        ), color: Colors.white,
+                                        ),
+                                        color: Colors.white,
                                         onSelected: (value) {
                                           if (value == 'edit') {
                                             Navigator.push(
