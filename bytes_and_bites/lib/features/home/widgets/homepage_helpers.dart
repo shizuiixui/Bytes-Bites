@@ -4,7 +4,6 @@ import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:bytes_and_bites/models/expense_model.dart';
 import 'package:bytes_and_bites/models/subscription_model.dart';
@@ -452,7 +451,7 @@ class _HomeCarouselState extends State<HomeCarousel> {
                                             child: Row(
                                               children: [
                                                 Icon(
-                                                  Icons.delete,
+                                                  Icons.delete_rounded,
                                                   color: Colors.red.shade400,
                                                   size: 20.sp,
                                                 ),

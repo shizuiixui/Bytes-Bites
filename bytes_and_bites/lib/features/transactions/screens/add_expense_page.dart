@@ -9,7 +9,9 @@ import 'package:bytes_and_bites/features/transactions/widgets/add_expense_helper
 import 'package:bytes_and_bites/models/expense_model.dart';
 
 class AddExpensePage extends StatefulWidget {
-  const AddExpensePage({super.key});
+  final ExpenseModel? existingExpense;
+
+  const AddExpensePage({super.key, this.existingExpense});
 
   @override
   State<AddExpensePage> createState() => _AddExpensePageState();
@@ -21,6 +23,22 @@ class _AddExpensePageState extends State<AddExpensePage> {
 
   ExpenseCategory? _selectedCategory;
   DateTime _selectedDate = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.existingExpense != null) {
+      final exp = widget.existingExpense!;
+      _descController.text = exp.description;
+      _amountController.text = exp.amount.toString();
+      _selectedDate = exp.date;
+
+      _selectedCategory = expenseCategories.firstWhere(
+        (cat) => cat.name == exp.categoryName,
+        orElse: () => expenseCategories.first,
+      );
+    }
+  }
 
   void _openCategoryPicker() {
     showModalBottomSheet(
@@ -79,6 +97,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     );
   }
 
+  // Confirmation Dialog
   void _showConfirmationDialog() {
     if (_descController.text.isEmpty ||
         _amountController.text.isEmpty ||
@@ -100,7 +119,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     }
 
     bool isSaving = false;
-
+    bool isEditing = widget.existingExpense != null;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -118,13 +137,15 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.help_outline_rounded,
+                      isEditing
+                          ? Icons.edit_rounded
+                          : Icons.help_outline_rounded,
                       size: 50.sp,
                       color: const Color(0xFFB0DB9C),
                     ),
                     SizedBox(height: 16.h),
                     Text(
-                      "Save Expense?",
+                      isEditing ? "Update Expense?" : "Save Expense?",
                       style: TextStyle(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.bold,
@@ -134,7 +155,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      "Are you sure you want to add ₱${_amountController.text} for ${_descController.text}?",
+                      isEditing
+                          ? "Are you sure you want to update ${_descController.text} to ₱${_amountController.text}?"
+                          : "Are you sure you want to add ₱${_amountController.text} for ${_descController.text}?",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14.sp,
@@ -148,7 +171,6 @@ class _AddExpensePageState extends State<AddExpensePage> {
                         // Cancel Button
                         Expanded(
                           child: OutlinedButton(
-                            // Disable the cancel button while loading
                             onPressed: isSaving
                                 ? null
                                 : () => Navigator.pop(dialogContext),
@@ -176,7 +198,6 @@ class _AddExpensePageState extends State<AddExpensePage> {
                             onPressed: isSaving
                                 ? null
                                 : () async {
-                                    // Trigger the spinner
                                     setDialogState(() {
                                       isSaving = true;
                                     });
@@ -184,17 +205,34 @@ class _AddExpensePageState extends State<AddExpensePage> {
                                       const Duration(milliseconds: 1800),
                                     );
 
-                                    final newExpense = ExpenseModel(
-                                      description: _descController.text,
-                                      amount: double.parse(
+                                    if (isEditing) {
+                                      // Update Expense
+                                      final exp = widget.existingExpense!;
+                                      exp.description = _descController.text;
+                                      exp.amount = double.parse(
                                         _amountController.text,
-                                      ),
-                                      categoryName: _selectedCategory!.name,
-                                      date: _selectedDate,
-                                    );
+                                      );
+                                      exp.categoryName =
+                                          _selectedCategory!.name;
+                                      exp.date = _selectedDate;
 
-                                    final box = HiveBoxManager.expensesBox();
-                                    box.add(newExpense);
+                                      await exp
+                                          .save(); // Instantly updates Hive
+                                    } else {
+                                      // Add New Expense
+                                      final newExpense = ExpenseModel(
+                                        description: _descController.text,
+                                        amount: double.parse(
+                                          _amountController.text,
+                                        ),
+                                        categoryName: _selectedCategory!.name,
+                                        date: _selectedDate,
+                                      );
+
+                                      final box = HiveBoxManager.expensesBox();
+                                      box.add(newExpense);
+                                    }
+
                                     if (context.mounted) {
                                       Navigator.pop(dialogContext);
 
@@ -202,9 +240,11 @@ class _AddExpensePageState extends State<AddExpensePage> {
                                         this.context,
                                       ).showSnackBar(
                                         SnackBar(
-                                          content: const Text(
-                                            "Expense saved successfully!",
-                                            style: TextStyle(
+                                          content: Text(
+                                            isEditing
+                                                ? "Expense updated!"
+                                                : "Expense saved successfully!",
+                                            style: const TextStyle(
                                               fontFamily: 'Inter',
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -263,6 +303,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     );
   }
 
+  // Pick Date Function
   Future<void> _pickDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -298,6 +339,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isEditing = widget.existingExpense != null;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
@@ -315,7 +358,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Add new expense",
+                isEditing ? "Edit expense" : "Add new expense",
                 style: TextStyle(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
@@ -325,7 +368,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
               ),
               SizedBox(height: 8.h),
               Text(
-                "Enter the details of your expense to help you track your spending",
+                isEditing
+                    ? "Update the details of your expense."
+                    : "Enter the details of your expense to help you track your spending",
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontFamily: 'Inter',
@@ -387,7 +432,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
               SizedBox(height: 40.h),
 
               PrimaryButton(
-                text: "Save Expense",
+                text: isEditing ? "Update Expense" : "Save Expense",
                 onPressed: _showConfirmationDialog,
               ),
               SizedBox(height: 20.h),

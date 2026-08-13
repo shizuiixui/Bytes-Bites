@@ -4,16 +4,16 @@ part 'expense_model.g.dart';
 @HiveType(typeId: 0)
 class ExpenseModel extends HiveObject {
   @HiveField(0)
-  final String description;
+  String description;
 
   @HiveField(1)
-  final double amount;
+  double amount;
 
   @HiveField(2)
-  final String categoryName;
+  String categoryName;
 
   @HiveField(3)
-  final DateTime date;
+  DateTime date;
 
   ExpenseModel({
     required this.description,
