@@ -71,7 +71,7 @@ class _ChangePasscodePageState extends State<ChangePasscodePage> {
         const SnackBar(
           content: Text(
             "Passcode updated successfully!",
-            style: TextStyle(fontFamily: 'Inter'),
+            style: TextStyle(fontFamily: 'Inter', color: Colors.white),
           ),
           backgroundColor: Color(0xFFB0DB9C),
           behavior: SnackBarBehavior.fixed,

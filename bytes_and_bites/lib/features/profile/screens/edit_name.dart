@@ -50,7 +50,7 @@ class _ChangeNamePageState extends State<ChangeNamePage> {
       SnackBar(
         content: const Text(
           "Name updated successfully!",
-          style: TextStyle(fontFamily: 'Inter'),
+          style: TextStyle(fontFamily: 'Inter', color: Colors.white),
         ),
         backgroundColor: const Color(0xFFB0DB9C),
         behavior: SnackBarBehavior.fixed,
