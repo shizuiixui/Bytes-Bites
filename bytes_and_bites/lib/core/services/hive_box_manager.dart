@@ -21,11 +21,20 @@ class HiveBoxManager {
 
   static String _userScopeSuffix({String? userName}) {
     final settingsBox = Hive.box(settingsBoxName);
-    final resolvedName =
-        userName ??
-        settingsBox.get('userName', defaultValue: 'guest') as String;
-    final sanitized = _sanitizeUserName(resolvedName);
-    return sanitized.isEmpty ? 'guest' : sanitized;
+
+    String? accountId = settingsBox.get('accountId');
+
+    if (accountId == null) {
+      final resolvedName =
+          userName ??
+          settingsBox.get('userName', defaultValue: 'guest') as String;
+      accountId = _sanitizeUserName(resolvedName);
+
+      if (accountId.isEmpty) accountId = 'guest';
+      settingsBox.put('accountId', accountId);
+    }
+
+    return accountId;
   }
 
   static String expenseBoxName({String? userName}) =>
