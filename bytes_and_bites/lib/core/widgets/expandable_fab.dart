@@ -77,7 +77,7 @@ class _ExpandableFabState extends State<ExpandableFab>
 
           // Expenses
           _buildExpandingAction(
-            label: "Expenses",
+            label: "Transactions",
             bottomOffset: 60,
             icon: Image.asset(
               'assets/images/bottom_nav_bar/fab_transactions.png',
