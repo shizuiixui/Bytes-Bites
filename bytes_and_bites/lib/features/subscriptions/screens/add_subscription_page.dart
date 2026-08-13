@@ -114,8 +114,37 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
       );
       return;
     }
-    bool isSaving = false;
+
     bool isEditing = widget.existingSubscription != null;
+    final String newServiceName = _serviceController.text.trim();
+    final box = HiveBoxManager.subscriptionsBox();
+
+    // Duplicate Check Logic
+    bool subExists = box.values.any((sub) {
+      // Ignore itself during the edit check
+      if (isEditing && sub.key == widget.existingSubscription!.key)
+        return false;
+      return sub.name.toLowerCase() == newServiceName.toLowerCase();
+    });
+
+    if (subExists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            "This subscription already exists!",
+            style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.fixed,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.r),
+          ),
+        ),
+      );
+      return;
+    }
+
+    bool isSaving = false;
 
     showDialog(
       context: context,
@@ -128,6 +157,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                 borderRadius: BorderRadius.circular(20.r),
               ),
               backgroundColor: Colors.white,
+              surfaceTintColor: Colors.transparent,
               child: Padding(
                 padding: EdgeInsets.all(24.w),
                 child: Column(
@@ -200,9 +230,20 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                                       const Duration(milliseconds: 1800),
                                     );
 
+                                    String snackBarMessage =
+                                        "Subscription saved successfully!";
+
                                     if (isEditing) {
                                       final sub = widget.existingSubscription!;
-                                      sub.name = _serviceController.text.trim();
+                                      if (sub.name != newServiceName) {
+                                        snackBarMessage =
+                                            "Subscription renamed to $newServiceName!";
+                                      } else {
+                                        snackBarMessage =
+                                            "Subscription updated!";
+                                      }
+
+                                      sub.name = newServiceName;
                                       sub.amount =
                                           double.tryParse(
                                             _amountController.text,
@@ -210,15 +251,14 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                                           sub.amount;
                                       sub.nextBillingDate = _selectedDate;
 
-                                      await sub
-                                          .save();
+                                      await sub.save();
                                       // Re-schedule updated notification
                                       await NotificationService()
                                           .scheduleSubscriptionAlerts(sub);
                                     } else {
                                       // Add New Subscription
                                       final newSubscription = SubscriptionModel(
-                                        name: _serviceController.text.trim(),
+                                        name: newServiceName,
                                         amount:
                                             double.tryParse(
                                               _amountController.text,
@@ -236,34 +276,38 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                                           );
                                     }
 
-                                    Navigator.pop(context);
+                                    if (context.mounted) {
+                                      Navigator.pop(
+                                        dialogContext,
+                                      ); // Close dialog
 
-                                    ScaffoldMessenger.of(
-                                      this.context,
-                                    ).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          isEditing
-                                              ? "Subscription updated!"
-                                              : "Subscription saved successfully!",
-                                          style: const TextStyle(
-                                            fontFamily: 'Inter',
-                                            fontWeight: FontWeight.bold,
+                                      ScaffoldMessenger.of(
+                                        this.context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            snackBarMessage,
+                                            style: const TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          backgroundColor: const Color(
+                                            0xFFB0DB9C,
+                                          ),
+                                          behavior: SnackBarBehavior.fixed,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              10.r,
+                                            ),
                                           ),
                                         ),
-                                        backgroundColor: const Color(
-                                          0xFFB0DB9C,
-                                        ),
-                                        behavior: SnackBarBehavior.fixed,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            10.r,
-                                          ),
-                                        ),
-                                      ),
-                                    );
+                                      );
 
-                                    Navigator.pop(this.context);
+                                      Navigator.pop(
+                                        this.context,
+                                      ); // Return to previous page
+                                    }
                                   },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFB0DB9C),
