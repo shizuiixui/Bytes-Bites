@@ -4,9 +4,11 @@ import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:bytes_and_bites/models/expense_model.dart';
 import 'package:bytes_and_bites/models/subscription_model.dart';
+import 'package:bytes_and_bites/features/subscriptions/screens/add_subscription_page.dart';
 
 // Home Header
 class HomeHeader extends StatelessWidget {
@@ -177,7 +179,7 @@ class TotalSpent extends StatelessWidget {
   }
 }
 
-// Home Carousel
+// Home Carousel (Upcoming Subscriptions)
 class HomeCarousel extends StatefulWidget {
   const HomeCarousel({super.key});
 
@@ -203,6 +205,65 @@ class _HomeCarouselState extends State<HomeCarousel> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  //  Delete Confirmation Dialog
+  void _showDeleteConfirmation(BuildContext context, dynamic sub) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        title: Text(
+          "Delete Subscription",
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            fontSize: 18.sp,
+          ),
+        ),
+        content: Text(
+          "Are you sure you want to delete ${sub.name}? This action cannot be undone.",
+          style: TextStyle(fontFamily: 'Inter', fontSize: 14.sp),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel", style: TextStyle(color: Colors.grey, fontFamily: 'Inter')),
+          ),
+          TextButton(
+            onPressed: () async {
+              // Deletes the item from Hive
+              await sub.delete();
+
+              if (context.mounted) {
+                Navigator.pop(context); // Close dialog
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      "${sub.name} Deleted",
+                      style: const TextStyle(fontFamily: 'Inter'),
+                    ),
+                    backgroundColor: Colors.redAccent,
+                    behavior: SnackBarBehavior.fixed,
+                  ),
+                );
+              }
+            },
+            child: const Text(
+              "Delete",
+              style: TextStyle(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -302,7 +363,12 @@ class _HomeCarouselState extends State<HomeCarousel> {
                           child: Padding(
                             padding: EdgeInsets.all(8.w),
                             child: Container(
-                              padding: EdgeInsets.all(16.w),
+                              padding: EdgeInsets.only(
+                                left: 16.w,
+                                right: 8.w,
+                                top: 12.h,
+                                bottom: 16.h,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(16.r),
@@ -331,13 +397,79 @@ class _HomeCarouselState extends State<HomeCarousel> {
                                           color: Colors.black87,
                                         ),
                                       ),
-                                      Icon(
-                                        Icons.credit_card_rounded,
-                                        color: const Color(0xFFB0DB9C),
+
+                                      // 3-Dot Options Menu
+                                      PopupMenuButton<String>(
+                                        icon: Icon(
+                                          Icons.more_vert_rounded,
+                                          color: Colors.black,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12.r,
+                                          ),
+                                        ), color: Colors.white,
+                                        onSelected: (value) {
+                                          if (value == 'edit') {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    AddSubscriptionPage(
+                                                      existingSubscription: sub,
+                                                    ),
+                                              ),
+                                            );
+                                          } else if (value == 'delete') {
+                                            _showDeleteConfirmation(
+                                              context,
+                                              sub,
+                                            );
+                                          }
+                                        },
+                                        itemBuilder: (BuildContext context) => [
+                                          PopupMenuItem(
+                                            value: 'edit',
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.edit_rounded,
+                                                  color: Colors.black,
+                                                  size: 20.sp,
+                                                ),
+                                                SizedBox(width: 8.w),
+                                                const Text(
+                                                  "Edit",
+                                                  style: TextStyle(
+                                                    fontFamily: 'Inter',
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 'delete',
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.delete,
+                                                  color: Colors.red.shade400,
+                                                  size: 20.sp,
+                                                ),
+                                                SizedBox(width: 8.w),
+                                                const Text(
+                                                  "Delete",
+                                                  style: TextStyle(
+                                                    fontFamily: 'Inter',
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: 8.h),
                                   Text(
                                     "₱${sub.amount.toStringAsFixed(2)}",
                                     style: TextStyle(
@@ -422,18 +554,12 @@ class SectionHeader extends StatelessWidget {
           ),
           if (onSeeAllTap != null)
             Material(
-              color:
-                  Colors.transparent,
+              color: Colors.transparent,
               child: InkWell(
                 onTap: onSeeAllTap,
-                borderRadius: BorderRadius.circular(
-                  4.r,
-                ),
+                borderRadius: BorderRadius.circular(4.r),
                 child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 8.w,
-                    vertical: 4.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                   child: Text(
                     "See All",
                     style: TextStyle(

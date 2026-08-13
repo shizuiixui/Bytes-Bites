@@ -9,7 +9,9 @@ import 'package:bytes_and_bites/models/subscription_model.dart';
 import 'package:bytes_and_bites/core/services/notification_service.dart';
 
 class AddSubscriptionPage extends StatefulWidget {
-  const AddSubscriptionPage({super.key});
+  final SubscriptionModel? existingSubscription;
+
+  const AddSubscriptionPage({super.key, this.existingSubscription});
 
   @override
   State<AddSubscriptionPage> createState() => _AddSubscriptionPageState();
@@ -21,6 +23,20 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
 
   SubscriptionCategory? _selectedCategory;
   DateTime _selectedDate = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.existingSubscription != null) {
+      final sub = widget.existingSubscription!;
+      _serviceController.text = sub.name;
+      _amountController.text = sub.amount.toString();
+      _selectedDate = sub.nextBillingDate;
+      if (subscriptionCategories.isNotEmpty) {
+        _selectedCategory = subscriptionCategories.first;
+      }
+    }
+  }
 
   void _openCategoryPicker() {
     showModalBottomSheet(
@@ -45,7 +61,6 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                   ),
                 ),
                 SizedBox(height: 10.h),
-                // Loops through the subscriptionCategories from your global data file!
                 ...subscriptionCategories.map(
                   (category) => ListTile(
                     leading: Container(
@@ -80,7 +95,6 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
     );
   }
 
-  // Confirmation Dialog
   void _showConfirmationDialog() {
     if (_serviceController.text.isEmpty ||
         _amountController.text.isEmpty ||
@@ -101,6 +115,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
       return;
     }
     bool isSaving = false;
+    bool isEditing = widget.existingSubscription != null;
 
     showDialog(
       context: context,
@@ -119,13 +134,15 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.subscriptions_rounded,
+                      isEditing
+                          ? Icons.edit_rounded
+                          : Icons.subscriptions_rounded,
                       size: 50.sp,
                       color: const Color(0xFFB0DB9C),
                     ),
                     SizedBox(height: 16.h),
                     Text(
-                      "Save Subscription?",
+                      isEditing ? "Update Subscription?" : "Save Subscription?",
                       style: TextStyle(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.bold,
@@ -135,7 +152,9 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      "Are you sure you want to add ₱${_amountController.text} for ${_serviceController.text}?",
+                      isEditing
+                          ? "Are you sure you want to update ${_serviceController.text} to ₱${_amountController.text}?"
+                          : "Are you sure you want to add ₱${_amountController.text} for ${_serviceController.text}?",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14.sp,
@@ -146,7 +165,6 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                     SizedBox(height: 24.h),
                     Row(
                       children: [
-                        // Cancel Button
                         Expanded(
                           child: OutlinedButton(
                             onPressed: isSaving
@@ -170,7 +188,6 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                           ),
                         ),
                         SizedBox(width: 12.w),
-                        // Confirm Button
                         Expanded(
                           child: ElevatedButton(
                             onPressed: isSaving
@@ -182,27 +199,42 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                                     await Future.delayed(
                                       const Duration(milliseconds: 1800),
                                     );
-                                    //  Create the database object
-                                    final newSubscription = SubscriptionModel(
-                                      name: _serviceController.text.trim(),
-                                      amount:
+
+                                    if (isEditing) {
+                                      final sub = widget.existingSubscription!;
+                                      sub.name = _serviceController.text.trim();
+                                      sub.amount =
                                           double.tryParse(
                                             _amountController.text,
                                           ) ??
-                                          0.0,
-                                      nextBillingDate: _selectedDate,
-                                    );
+                                          sub.amount;
+                                      sub.nextBillingDate = _selectedDate;
 
-                                    // Save it to the Hive box
-                                    HiveBoxManager.subscriptionsBox().add(
-                                      newSubscription,
-                                    );
+                                      await sub
+                                          .save();
+                                      // Re-schedule updated notification
+                                      await NotificationService()
+                                          .scheduleSubscriptionAlerts(sub);
+                                    } else {
+                                      // Add New Subscription
+                                      final newSubscription = SubscriptionModel(
+                                        name: _serviceController.text.trim(),
+                                        amount:
+                                            double.tryParse(
+                                              _amountController.text,
+                                            ) ??
+                                            0.0,
+                                        nextBillingDate: _selectedDate,
+                                      );
 
-                                    // Schedule Notification
-                                    await NotificationService()
-                                        .scheduleSubscriptionAlerts(
-                                          newSubscription,
-                                        );
+                                      HiveBoxManager.subscriptionsBox().add(
+                                        newSubscription,
+                                      );
+                                      await NotificationService()
+                                          .scheduleSubscriptionAlerts(
+                                            newSubscription,
+                                          );
+                                    }
 
                                     Navigator.pop(context);
 
@@ -210,9 +242,11 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                                       this.context,
                                     ).showSnackBar(
                                       SnackBar(
-                                        content: const Text(
-                                          "Subscription saved successfully!",
-                                          style: TextStyle(
+                                        content: Text(
+                                          isEditing
+                                              ? "Subscription updated!"
+                                              : "Subscription saved successfully!",
+                                          style: const TextStyle(
                                             fontFamily: 'Inter',
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -229,9 +263,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                                       ),
                                     );
 
-                                    Navigator.pop(
-                                      this.context,
-                                    ); // Return to home page
+                                    Navigator.pop(this.context);
                                   },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFB0DB9C),
@@ -308,6 +340,8 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isEditing = widget.existingSubscription != null;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
@@ -325,7 +359,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Add new subscriptions",
+                isEditing ? "Edit subscription" : "Add new subscriptions",
                 style: TextStyle(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
@@ -335,7 +369,9 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
               ),
               SizedBox(height: 8.h),
               Text(
-                "Enter the details of your subscription to help you track your spending",
+                isEditing
+                    ? "Update the details of your subscription."
+                    : "Enter the details of your subscription to help you track your spending",
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontFamily: 'Inter',
@@ -345,7 +381,6 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
               ),
               SizedBox(height: 30.h),
 
-              // UI Helpers called perfectly!
               buildLabel("Service Name"),
               buildTextField(
                 hint: "Enter Service Name",
@@ -393,7 +428,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
               SizedBox(height: 40.h),
 
               PrimaryButton(
-                text: "Save Subscription",
+                text: isEditing ? "Update Subscription" : "Save Subscription",
                 onPressed: _showConfirmationDialog,
               ),
               SizedBox(height: 20.h),

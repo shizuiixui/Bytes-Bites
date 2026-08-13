@@ -5,13 +5,13 @@ part 'subscription_model.g.dart';
 @HiveType(typeId: 2)
 class SubscriptionModel extends HiveObject {
   @HiveField(0)
-  final String name;
+  String name;
 
   @HiveField(1)
-  final double amount;
+  double amount;
 
   @HiveField(2)
-  final DateTime nextBillingDate;
+  DateTime nextBillingDate;
 
   SubscriptionModel({
     required this.name,
