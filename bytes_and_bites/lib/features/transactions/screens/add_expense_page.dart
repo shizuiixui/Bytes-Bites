@@ -259,8 +259,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
                                         SnackBar(
                                           content: Text(
                                             isEditing
-                                                ? "Expense updated!"
-                                                : "Expense saved successfully!",
+                                                ? "Expense Updated!"
+                                                : "Expense Saved Successfully!",
                                             style: const TextStyle(
                                               fontFamily: 'Inter',
                                               fontWeight: FontWeight.bold,
@@ -375,7 +375,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isEditing ? "Edit expense" : "Add new expense",
+                isEditing ? "Edit Expense" : "Add New Expense",
                 style: TextStyle(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,

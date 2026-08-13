@@ -403,7 +403,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isEditing ? "Edit subscription" : "Add new subscriptions",
+                isEditing ? "Edit Subscription" : "Add New Subscriptions",
                 style: TextStyle(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,

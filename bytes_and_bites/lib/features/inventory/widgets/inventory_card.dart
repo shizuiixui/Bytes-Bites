@@ -62,7 +62,7 @@ class InventoryCard extends StatelessWidget {
                 Navigator.pop(dialogContext); // Close Dialog
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text("$name deleted"),
+                    content: Text("$name Deleted"),
                     backgroundColor: Colors.redAccent,
                   ),
                 );
