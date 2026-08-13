@@ -19,7 +19,7 @@ class InventoryCard extends StatelessWidget {
     }
   }
 
-  // --- DELETE CONFIRMATION ---
+  // Delete Confirmation Dialog
   void _showDeleteDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -28,6 +28,8 @@ class InventoryCard extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),
           ),
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
           title: Text(
             "Delete Item?",
             style: TextStyle(
@@ -78,7 +80,7 @@ class InventoryCard extends StatelessWidget {
     );
   }
 
-  // --- QUICK EDIT DIALOG ---
+  // Quick Edit Dialog
   void _showEditDialog(BuildContext context) {
     final TextEditingController nameController = TextEditingController(
       text: item.name,
@@ -91,6 +93,8 @@ class InventoryCard extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),
           ),
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
           title: Text(
             "Edit Item",
             style: TextStyle(
@@ -263,9 +267,7 @@ class InventoryCard extends StatelessWidget {
                   if (value == 'edit') {
                     _showEditDialog(context);
                   } else if (value == 'delete') {
-                    _showDeleteDialog(
-                      context,
-                    );
+                    _showDeleteDialog(context);
                   }
                 },
                 itemBuilder: (BuildContext context) => [
@@ -295,7 +297,7 @@ class InventoryCard extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.delete_rounded,
-                          size: 18.sp,
+                          size: 20.sp,
                           color: Colors.redAccent,
                         ),
                         SizedBox(width: 8.w),
