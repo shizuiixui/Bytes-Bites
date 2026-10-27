@@ -50,6 +50,9 @@ void main() async {
   final notifService = NotificationService();
   await notifService.init();
   await notifService.requestPermissions();
+  if (initialRoute == 'homepage') {
+    await notifService.rescheduleAllSubscriptions();
+  }
 
   runApp(BytesAndBitesApp(nextRoute: initialRoute));
 }

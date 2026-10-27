@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
+import 'package:bytes_and_bites/core/services/notification_service.dart';
 import 'package:bytes_and_bites/features/home/widgets/month_picker_sheet.dart';
 import 'package:bytes_and_bites/features/home/widgets/homepage_helpers.dart';
 import 'package:bytes_and_bites/models/expense_model.dart';
@@ -27,6 +28,12 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   DateTime _selectedDate = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    NotificationService().rescheduleAllSubscriptions();
+  }
 
   void _openMonthPicker() async {
     final DateTime? pickedDate = await showModalBottomSheet<DateTime>(

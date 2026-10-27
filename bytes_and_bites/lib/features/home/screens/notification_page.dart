@@ -95,20 +95,33 @@ class _NotificationPageState extends State<NotificationPage> {
                 }
               }
 
-              // Check for Subscriptions Due Soon
+              // Check for Subscriptions Due Soon (7 days, 3 days, 1 day, and due today)
               for (var sub in subBox.values) {
-                if (sub.daysUntilDue >= 0 && sub.daysUntilDue <= 3) {
+                if (sub.daysUntilDue >= 0 && sub.daysUntilDue <= 7) {
                   String notifId =
                       'sub_${sub.key}_${sub.nextBillingDate.millisecondsSinceEpoch}';
                   currentNotificationIds.add(notifId);
+
+                  String title;
+                  String message;
+                  if (sub.daysUntilDue == 0) {
+                    title = "Bill Due Today";
+                    message = "Your ₱${sub.amount} bill for ${sub.name} is due today.";
+                  } else if (sub.daysUntilDue == 1) {
+                    title = "Bill Due Tomorrow";
+                    message = "Your ₱${sub.amount} bill for ${sub.name} is due tomorrow.";
+                  } else {
+                    title = "Upcoming Bill";
+                    message =
+                        "Your ₱${sub.amount} bill for ${sub.name} is due in ${sub.daysUntilDue} days.";
+                  }
 
                   notificationTiles.add(
                     _buildNotificationTile(
                       icon: Icons.credit_card_outlined,
                       iconColor: const Color(0xFFE57373),
-                      title: "Upcoming Bill",
-                      message:
-                          "Your ₱${sub.amount} bill for ${sub.name} is due in ${sub.daysUntilDue} days.",
+                      title: title,
+                      message: message,
                       timeSpan: "Subscriptions",
                       isRead: _readNotifs.contains(notifId),
                       onTap: () => _markAsRead(notifId),

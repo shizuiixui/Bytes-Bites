@@ -236,6 +236,8 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                                     if (isEditing) {
                                       final sub = widget.existingSubscription!;
                                       if (sub.name != newServiceName) {
+                                        await NotificationService()
+                                            .cancelSubscriptionAlerts(sub.name);
                                         snackBarMessage =
                                             "Subscription renamed to $newServiceName!";
                                       } else {
@@ -254,7 +256,10 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                                       await sub.save();
                                       // Re-schedule updated notification
                                       await NotificationService()
-                                          .scheduleSubscriptionAlerts(sub);
+                                          .scheduleSubscriptionAlerts(
+                                            sub,
+                                            forceInstant: true,
+                                          );
                                     } else {
                                       // Add New Subscription
                                       final newSubscription = SubscriptionModel(
@@ -273,6 +278,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                                       await NotificationService()
                                           .scheduleSubscriptionAlerts(
                                             newSubscription,
+                                            forceInstant: true,
                                           );
                                     }
 

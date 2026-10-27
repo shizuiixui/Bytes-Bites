@@ -1,6 +1,7 @@
 import 'package:bytes_and_bites/core/widgets/profile_avatar.dart';
 import 'package:bytes_and_bites/features/home/screens/notification_page.dart';
 import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
+import 'package:bytes_and_bites/core/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -301,6 +302,8 @@ class _HomeCarouselState extends State<HomeCarousel> {
           ),
           TextButton(
             onPressed: () async {
+              // Cancel notifications for deleted subscription
+              await NotificationService().cancelSubscriptionAlerts(sub.name);
               // Deletes the item from Hive
               await sub.delete();
 
