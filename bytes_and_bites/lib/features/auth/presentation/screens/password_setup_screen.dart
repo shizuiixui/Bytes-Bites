@@ -61,6 +61,10 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
           await box.put('user_passcode', _pin);
           await box.put('is_first_time', false);
           await box.put('is_logged_in', true);
+          await box.put(
+            'last_active_time',
+            DateTime.now().millisecondsSinceEpoch,
+          );
 
           await HiveBoxManager.openUserDataBoxes();
           print("Saved New Passcode to Hive: $_pin");
@@ -72,6 +76,10 @@ class _PasswordSetupScreenState extends State<PasswordSetupScreen> {
           // Validate Existing Passcode
           if (_pin == _savedPasscode) {
             await box.put('is_logged_in', true);
+            await box.put(
+              'last_active_time',
+              DateTime.now().millisecondsSinceEpoch,
+            );
             await HiveBoxManager.openUserDataBoxes();
 
             if (mounted) {

@@ -1,8 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:bytes_and_bites/models/subscription_model.dart';
 import 'package:bytes_and_bites/core/services/hive_box_manager.dart';
+import 'package:bytes_and_bites/features/home/screens/notification_page.dart';
+import 'package:bytes_and_bites/main.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class NotificationService {
@@ -63,6 +66,18 @@ class NotificationService {
 
     await flutterLocalNotificationsPlugin.initialize(
       settings: initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        if (Hive.isBoxOpen(HiveBoxManager.settingsBoxName)) {
+          final box = Hive.box(HiveBoxManager.settingsBoxName);
+          final isLoggedIn =
+              box.get('is_logged_in', defaultValue: false) as bool;
+          if (isLoggedIn) {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(builder: (context) => const NotificationPage()),
+            );
+          }
+        }
+      },
     );
   }
 

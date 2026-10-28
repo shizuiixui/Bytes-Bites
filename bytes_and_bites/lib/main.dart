@@ -26,6 +26,9 @@ void main() async {
   await Hive.openBox('settingsBox');
   final settingsBox = Hive.box('settingsBox');
 
+  // Clear any stale inactive timer on fresh launch
+  await settingsBox.delete('last_active_time');
+
   final isFirstTime =
       settingsBox.get('is_first_time', defaultValue: true) as bool;
   final String? savedPasscode = settingsBox.get('user_passcode');
@@ -120,9 +123,15 @@ class _SessionManagerState extends State<SessionManager>
     final savedPasscode = box.get('user_passcode');
     if (savedPasscode == null || savedPasscode.isEmpty) return;
 
+    final isLoggedIn = box.get('is_logged_in', defaultValue: false) as bool;
+
     if (state == AppLifecycleState.paused) {
-      box.put('last_active_time', DateTime.now().millisecondsSinceEpoch);
+      if (isLoggedIn) {
+        box.put('last_active_time', DateTime.now().millisecondsSinceEpoch);
+      }
     } else if (state == AppLifecycleState.resumed) {
+      if (!isLoggedIn) return;
+
       final lastActiveTime = box.get('last_active_time');
 
       if (lastActiveTime != null) {
@@ -137,8 +146,11 @@ class _SessionManagerState extends State<SessionManager>
             'password_setup',
             (route) => false,
           );
+          return;
         }
       }
+      // If user resumed within 5 minutes, keep session active and refresh timestamp
+      box.put('last_active_time', DateTime.now().millisecondsSinceEpoch);
     }
   }
 
