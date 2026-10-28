@@ -324,7 +324,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Add new inventory stock",
+                "Add New Inventory Stock",
                 style: TextStyle(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
