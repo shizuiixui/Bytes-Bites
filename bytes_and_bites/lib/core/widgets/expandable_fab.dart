@@ -54,6 +54,16 @@ class _ExpandableFabState extends State<ExpandableFab>
         alignment: Alignment.bottomRight,
         clipBehavior: Clip.none,
         children: [
+          // Dismiss tap detector when open
+          if (_isOpen)
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: _toggleOpen,
+                child: const SizedBox.expand(),
+              ),
+            ),
+
           // Inventory
           _buildExpandingAction(
             label: "Inventory",
@@ -137,14 +147,39 @@ class _ExpandableFabState extends State<ExpandableFab>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Text Label
-          Text(
-            label,
-            style: const TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
+          // Text Label Pill Badge
+          GestureDetector(
+            onTap: () {
+              _controller.reverse();
+              setState(() => _isOpen = false);
+              onPressed();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+                border: Border.all(
+                  color: Colors.black.withOpacity(0.05),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -152,6 +187,7 @@ class _ExpandableFabState extends State<ExpandableFab>
           FloatingActionButton.small(
             heroTag: null,
             backgroundColor: Colors.white,
+            elevation: 3,
             onPressed: () {
               _controller.reverse();
               setState(() => _isOpen = false);
