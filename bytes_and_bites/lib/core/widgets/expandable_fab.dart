@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
 
 class ExpandableFab extends StatefulWidget {
-  const ExpandableFab({super.key});
+  final ValueChanged<bool>? onOpenChanged;
+
+  const ExpandableFab({super.key, this.onOpenChanged});
 
   @override
-  State<ExpandableFab> createState() => _ExpandableFabState();
+  ExpandableFabState createState() => ExpandableFabState();
 }
 
-class _ExpandableFabState extends State<ExpandableFab>
+class ExpandableFabState extends State<ExpandableFab>
     with SingleTickerProviderStateMixin {
   bool _isOpen = false;
   late AnimationController _controller;
   late Animation<double> _expandAnimation;
+
+  bool get isOpen => _isOpen;
+
+  void close() {
+    if (_isOpen) {
+      _controller.reverse();
+      setState(() => _isOpen = false);
+      widget.onOpenChanged?.call(false);
+    }
+  }
 
   @override
   void initState() {
@@ -36,6 +48,7 @@ class _ExpandableFabState extends State<ExpandableFab>
       } else {
         _controller.reverse();
       }
+      widget.onOpenChanged?.call(_isOpen);
     });
   }
 
@@ -150,8 +163,7 @@ class _ExpandableFabState extends State<ExpandableFab>
           // Text Label Pill Badge
           GestureDetector(
             onTap: () {
-              _controller.reverse();
-              setState(() => _isOpen = false);
+              close();
               onPressed();
             },
             child: Container(
@@ -189,8 +201,7 @@ class _ExpandableFabState extends State<ExpandableFab>
             backgroundColor: Colors.white,
             elevation: 3,
             onPressed: () {
-              _controller.reverse();
-              setState(() => _isOpen = false);
+              close();
               onPressed();
             },
             child: icon,

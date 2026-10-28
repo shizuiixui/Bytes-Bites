@@ -16,8 +16,13 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
+  bool _isFabOpen = false;
+  final GlobalKey<ExpandableFabState> _fabKey = GlobalKey<ExpandableFabState>();
 
   void _onItemTapped(int index) {
+    if (_isFabOpen) {
+      _fabKey.currentState?.close();
+    }
     setState(() {
       _selectedIndex = index;
     });
@@ -26,23 +31,41 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
+      body: Stack(
         children: [
-          HomePage(
-            onProfileTap: () => _onItemTapped(3),
-            onTransactionsTap: () => _onItemTapped(1),
-            onInventoryTap: () => _onItemTapped(2),
+          IndexedStack(
+            index: _selectedIndex,
+            children: [
+              HomePage(
+                onProfileTap: () => _onItemTapped(3),
+                onTransactionsTap: () => _onItemTapped(1),
+                onInventoryTap: () => _onItemTapped(2),
+              ),
+
+              // Index 1 : Transaction Page
+              const ExpensePage(),
+
+              // Index 2 : Inventory Page
+              const InventoryPage(),
+
+              // Index 3 : Profile Page
+              const ProfilePage(),
+            ],
           ),
 
-          // Index 1 : Transaction Page
-          const ExpensePage(),
-
-          // Index 2 : Inventory Page
-          const InventoryPage(),
-
-          // Index 3 : Profile Page
-          const ProfilePage(),
+          // Gentle scrim that closes the FAB when tapping anywhere outside
+          if (_isFabOpen)
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  _fabKey.currentState?.close();
+                },
+                child: Container(
+                  color: Colors.black.withOpacity(0.2),
+                ),
+              ),
+            ),
         ],
       ),
       // Bottom Navigation Bar
@@ -52,7 +75,14 @@ class _MainNavigationState extends State<MainNavigation> {
       ),
 
       // Floating Action Button
-      floatingActionButton: const ExpandableFab(),
+      floatingActionButton: ExpandableFab(
+        key: _fabKey,
+        onOpenChanged: (isOpen) {
+          setState(() {
+            _isFabOpen = isOpen;
+          });
+        },
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
