@@ -2,7 +2,7 @@
 
 > An offline-first, privacy-focused mobile application for college students to track their monthly budget and dorm pantry inventory in one secure place.
 
-![App Version](https://img.shields.io/badge/version-1.0.0-green)
+![App Version](https://img.shields.io/badge/version-1.0.1-green)
 ![Flutter](https://img.shields.io/badge/Flutter-SDK-blue)
 ![Privacy](https://img.shields.io/badge/Privacy-100%25_Offline-success)
 
